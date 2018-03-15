@@ -35,8 +35,6 @@ class AsyncTask
                     self::$obj->map = $inc;
                 }
             }
-        } else {
-            return self::$obj;
         }
         return self::$obj;
     }
