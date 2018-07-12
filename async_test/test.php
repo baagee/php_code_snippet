@@ -18,8 +18,12 @@ $data = [
 echo 'start' . PHP_EOL;
 $obj = AsyncTask::getInstance();
 // 添加任务
-$res = $obj->addTask('test_' . rand(1, 9), __DIR__.'/script/test_1.php');
+$res = $obj->addTask('test_' . rand(1, 9), __DIR__ . '/script/test_1.php');
 var_dump($res);
 //执行任务
 var_dump($obj->run('test_2', $data));
+
+//或者直接异步执行一个脚本
+AsyncTask::taskStart(__DIR__ . '/script/test_1.php',$data);
+
 echo 'end' . PHP_EOL . PHP_EOL;

@@ -49,20 +49,14 @@ class AsyncTask
     /**
      * 执行异步任务
      * @param string $task_name 任务名称
-     * @param array  $data      任务需要的数据
+     * @param array $data 任务需要的数据
      * @return bool|string
+     * @throws Exception
      */
     public function run($task_name, $data = [])
     {
         if ($script_path = $this->getTask($task_name)) {
-            $where = '';
-            foreach ($data as $k => $v) {
-                $where .= ' --' . $k . '=' . $v;
-            }
-            $command = PHP_BINDIR . '/php ' . $script_path . $where . ' &';
-            $handle = popen($command, 'w');
-            pclose($handle);
-            return $where;
+            return self::taskStart($script_path, $data);
         } else {
             return false;
         }
@@ -84,7 +78,7 @@ class AsyncTask
 
     /**
      * 填加一个任务
-     * @param string $task_name   任务名
+     * @param string $task_name 任务名
      * @param string $script_path 任务脚本路径
      * @return bool
      */
@@ -96,6 +90,29 @@ class AsyncTask
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * 异步任务开始执行
+     * @param string $task_script_path 任务脚本绝对路径
+     * @param array $params 脚本参数
+     * @return string 条件
+     * @throws Exception
+     */
+    public static function taskStart($task_script_path, $params = [])
+    {
+        if (file_exists($task_script_path)) {
+            $where = '';
+            foreach ($params as $k => $v) {
+                $where .= ' --' . $k . '=' . $v;
+            }
+            $command = PHP_BINDIR . '/php ' . $task_script_path . $where . ' &';
+            $handle = popen($command, 'w');
+            pclose($handle);
+            return $where;
+        } else {
+            throw new \Exception('任务脚本不存在', 100000);
         }
     }
 }
