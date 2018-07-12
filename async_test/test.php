@@ -18,7 +18,7 @@ $data = [
 echo 'start' . PHP_EOL;
 $obj = AsyncTask::getInstance();
 // 添加任务
-$res = $obj->addTask('test_' . rand(1, 9), '/home/work/odp_saas_dlh/app/trade/script/async_test/script/test_1.php');
+$res = $obj->addTask('test_' . rand(1, 9), __DIR__.'/script/test_1.php');
 var_dump($res);
 //执行任务
 var_dump($obj->run('test_2', $data));

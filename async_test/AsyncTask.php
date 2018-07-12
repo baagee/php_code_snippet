@@ -59,7 +59,7 @@ class AsyncTask
             foreach ($data as $k => $v) {
                 $where .= ' --' . $k . '=' . $v;
             }
-            $command = PHP_BINARY . ' ' . $script_path . $where . ' &';
+            $command = PHP_BINDIR . '/php ' . $script_path . $where . ' &';
             $handle = popen($command, 'w');
             pclose($handle);
             return $where;
