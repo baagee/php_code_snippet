@@ -94,6 +94,23 @@ class AsyncTask
     }
 
     /**
+     * 异步延迟任务
+     * @param int $delay_time 延迟时间 毫秒
+     * @param callable $function 任务方法
+     */
+    public function addDelayTask($delay_time, $function)
+    {
+        if (extension_loaded('swoole') === true) {
+            if ($delay_time > 86400000) {
+                die('最大支持延时86400000毫秒');
+            }
+            swoole_timer_after($delay_time, $function);
+        } else {
+            die('没有安装swoole扩展');
+        }
+    }
+
+    /**
      * 异步任务开始执行
      * @param string $task_script_path 任务脚本绝对路径
      * @param array $params 脚本参数
