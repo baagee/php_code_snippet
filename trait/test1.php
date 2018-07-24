@@ -96,3 +96,17 @@ $c->method_1();
 $c->method_2();
 $c->method_3();
 $c->t2m2();
+
+// 结果：
+/*
+ * sftp://usr/local/php/bin/php /home/trait/test1.php
+A method_1
+test1 method_2  age=34
+test1 method_1
+B method_2 age=12
+B method_3
+-----------------
+test1 method_1
+test2 method_2
+C method_3
+test2 method_2*/
