@@ -6,3 +6,4 @@
 - Proxy_Pattern 代理模式
 - Template_Pattern 模板模式
 - Command_Pattern 命令模式
+- Singleton_Pattern 单例模式
