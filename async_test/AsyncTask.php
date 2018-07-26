@@ -46,6 +46,10 @@ class AsyncTask
     {
     }
 
+    private function __construct()
+    {
+    }
+
     /**
      * 执行异步任务
      * @param string $task_name 任务名称

@@ -7,3 +7,5 @@
 - Template_Pattern 模板模式
 - Command_Pattern 命令模式
 - Singleton_Pattern 单例模式
+- Observer_Pattern 观察者模式
+- Strategy_Pattern 策略模式
