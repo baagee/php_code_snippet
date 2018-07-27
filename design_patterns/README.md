@@ -9,3 +9,4 @@
 - Singleton_Pattern 单例模式
 - Observer_Pattern 观察者模式
 - Strategy_Pattern 策略模式
+- Interpreter_Pattern 解释器模式
