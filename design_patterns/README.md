@@ -10,3 +10,4 @@
 - Observer_Pattern 观察者模式
 - Strategy_Pattern 策略模式
 - Interpreter_Pattern 解释器模式
+- Factory_Pattern 工厂模式
