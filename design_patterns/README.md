@@ -11,3 +11,4 @@
 - Strategy_Pattern 策略模式
 - Interpreter_Pattern 解释器模式
 - Factory_Pattern 工厂模式
+- Facade_Pattern 外观模式
