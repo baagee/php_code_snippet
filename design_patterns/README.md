@@ -12,3 +12,4 @@
 - Interpreter_Pattern 解释器模式
 - Factory_Pattern 工厂模式
 - Facade_Pattern 外观模式
+- Delegation_Pattern 委托模式
