@@ -14,3 +14,4 @@
 - Facade_Pattern 外观模式
 - Delegation_Pattern 委托模式
 - Decorator_Pattern 装饰器模式
+- DAO_Pattern 数据访问对象(Data Access Object)模式
