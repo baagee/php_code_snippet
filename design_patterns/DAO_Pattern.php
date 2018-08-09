@@ -7,7 +7,7 @@
  */
 class BaseDAO
 {
-    var $_db = null;
+    var $_db = null;s
     var $_table = null;
 
     function BaseDAO($config)

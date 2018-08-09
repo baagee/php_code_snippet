@@ -15,4 +15,5 @@
 - Delegation_Pattern 委托模式
 - Decorator_Pattern 装饰器模式
 - Builder_Pattern 建造者模式
+- Adapter_Pattern 适配器模式
 - DAO_Pattern 数据访问对象(Data Access Object)模式
