@@ -18,3 +18,4 @@
 - Adapter_Pattern 适配器模式
 - DAO_Pattern 数据访问对象(Data Access Object)模式
 - Visitor_Pattern 访问者模式
+- Prototype_Pattern 原型模式
