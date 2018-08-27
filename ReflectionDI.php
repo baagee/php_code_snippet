@@ -87,15 +87,24 @@ class DI
 
 }
 
-class Demo
+class demo1
 {
-    public function __construct($a = 1, $b = 2)
+    public function __construct()
     {
-        echo $a + $b;
+        echo __CLASS__ . PHP_EOL;
     }
 }
 
-$di = new DI();
+class Demo
+{
+    public function __construct(demo1 $b, $a = 1)
+    {
+        echo __CLASS__ . PHP_EOL;
+        var_dump($a, $b);
+    }
+}
+
+$di       = new DI();
 $di->demo = 'Demo';
 
 var_dump($di->demo);
