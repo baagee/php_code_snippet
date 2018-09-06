@@ -1,3 +1,3 @@
 # 错误异常信息展示页
 见：1.png
-![img](https://i.loli.net/2018/09/06/5b912772752eb.png)
+![img](https://meinv-1256151484.cos.ap-beijing.myqcloud.com/tuchuang/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_ba40837c-c483-4f82-a0bd-c2b4858b26f6.png)
