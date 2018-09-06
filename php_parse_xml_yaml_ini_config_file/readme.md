@@ -1,0 +1,1 @@
+# php读取ini,yaml,xml配置文件示例

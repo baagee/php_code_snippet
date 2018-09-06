@@ -1,0 +1,13 @@
+main:
+  app_name: test_app
+  app_key: dfasgfefwe
+  is_debug: true
+  url_rewrite: false
+
+mysql:
+  host: localhost
+  port: 6378
+
+redis:
+  host: localhost
+  port: 9999
