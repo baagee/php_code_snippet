@@ -171,4 +171,4 @@ class ExceptionErrorHandler
 }
 
 // 使用示例：
-ExceptionErrorHandler::register();
+//ExceptionErrorHandler::register();
