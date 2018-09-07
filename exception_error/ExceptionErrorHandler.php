@@ -10,15 +10,6 @@
  * Time: 下午3:24
  */
 
-/*
- * 使用：
- * set_error_handler(function ($err_no, $err_msg, $err_file, $err_line) {
-        ExceptionErrorHandler::errorHandle($err_no, $err_msg, $err_file, $err_line);
-    });
-    set_exception_handler(function ($exception) {
-        ExceptionErrorHandler::exceptionHandle($exception);
-    });
- */
 
 class ExceptionErrorHandler
 {
@@ -32,6 +23,19 @@ class ExceptionErrorHandler
     protected static $err_line = 0;
     // 保存错误的php代码
     protected static $err_php_code_arr = [];
+
+    /*
+     * 注册错误异常处理机制
+     */
+    public static function register()
+    {
+        set_error_handler(function ($err_no, $err_msg, $err_file, $err_line) {
+            self::errorHandle($err_no, $err_msg, $err_file, $err_line);
+        });
+        set_exception_handler(function ($exception) {
+            self::exceptionHandle($exception);
+        });
+    }
 
     /**
      * 展示错误信息界面
@@ -54,7 +58,7 @@ class ExceptionErrorHandler
      * 异常处理函数
      * @param \Throwable $exception
      */
-    public static function exceptionHandle(\Throwable $exception)
+    protected static function exceptionHandle(\Throwable $exception)
     {
         if ($exception instanceof \Exception) {
             self::$type = 'Exception';
@@ -108,7 +112,7 @@ class ExceptionErrorHandler
      * @param string $err_file 错误文件
      * @param int    $err_line 错误行
      */
-    public static function errorHandle($err_no, $err_msg, $err_file, $err_line)
+    protected static function errorHandle($err_no, $err_msg, $err_file, $err_line)
     {
         self::$type     = 'Error';
         self::$err_line = $err_line;
@@ -165,3 +169,6 @@ class ExceptionErrorHandler
         return sprintf($format, $line);
     }
 }
+
+// 使用示例：
+ExceptionErrorHandler::register();
