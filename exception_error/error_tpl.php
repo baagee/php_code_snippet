@@ -40,7 +40,9 @@ if ($is_debug) {
 
         if (!empty($err_php_code_arr)) {
             echo '<pre id="php_error_code" style="overflow: hidden;display: inline"><code class="php" style="padding-bottom: 0;overflow: hidden;text-overflow:ellipsis;">';
+            $max_len=strlen(max(array_keys($err_php_code_arr)));
             foreach ($err_php_code_arr as $line => $code) {
+                $line=str_pad($line,$max_len,'0',STR_PAD_LEFT);
                 if (!empty($code)) {
                     if ($err_line == $line) {
                         echo '</code>';
@@ -59,12 +61,14 @@ if ($is_debug) {
         echo '<p><strong>PHP Backtrace</strong></p>';
         echo '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
         echo '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
+        $max_len = strlen(max(array_column($backtrace, 'line')));
+
         foreach ($backtrace as $k => $msg) {
             $k++;
             echo '<tr class="bg1">';
             echo '<td>' . $k . '</td>';
             echo '<td>' . $msg['file'] . '</td>';
-            echo '<td>' . $msg['line'] . '</td>';
+            echo '<td>' . str_pad($msg['line'],$max_len,'0',STR_PAD_LEFT) . '</td>';
             echo '<td>' . $msg['function'] . '</td>';
             echo '</tr>';
         }

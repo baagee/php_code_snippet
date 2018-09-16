@@ -24,19 +24,6 @@ class ExceptionErrorHandler
     // 保存错误的php代码
     protected static $err_php_code_arr = [];
 
-    /*
-     * 注册错误异常处理机制
-     */
-    public static function register()
-    {
-        set_error_handler(function ($err_no, $err_msg, $err_file, $err_line) {
-            self::errorHandle($err_no, $err_msg, $err_file, $err_line);
-        });
-        set_exception_handler(function ($exception) {
-            self::exceptionHandle($exception);
-        });
-    }
-
     /**
      * 展示错误信息界面
      */
@@ -52,6 +39,19 @@ class ExceptionErrorHandler
         ob_end_clean();
         include_once __DIR__ . '/error_tpl.php';
         exit();
+    }
+
+    /*
+     * 注册错误异常处理机制
+     */
+    public static function register()
+    {
+        set_error_handler(function ($err_no, $err_msg, $err_file, $err_line) {
+            self::errorHandle($err_no, $err_msg, $err_file, $err_line);
+        });
+        set_exception_handler(function ($exception) {
+            self::exceptionHandle($exception);
+        });
     }
 
     /**
@@ -79,7 +79,9 @@ class ExceptionErrorHandler
             if (!isset($error['line'])) {
                 continue;
             }
-            self::$backtrace[] = array('file' => str_replace(array(ROOT_PATH, '\\'), array('', '/'), $error['file']), 'line' => $error['line'], 'function' => $error['function']);
+            if (!empty($error['file']) && !empty($error['line'])) {
+                self::$backtrace[] = array('file' => str_replace(array(ROOT_PATH, '\\'), array('', '/'), $error['file']), 'line' => $error['line'], 'function' => $error['function']);
+            }
         }
         self::$err_msg = '[' . $exception->getCode() . '] ' . $exception->getMessage();
 
@@ -94,12 +96,12 @@ class ExceptionErrorHandler
     {
         $error_file = ROOT_PATH . self::$backtrace[0]['file'];
         $err_line   = self::$backtrace[0]['line'];
-        $fh         = new SplFileObject($error_file);
+        $fh         = new \SplFileObject($error_file);
         $start_line = $err_line - 9 < 0 ? 0 : $err_line - 9;
         $fh->seek($start_line);
         $content = [];
         for ($i = 0; $i <= 16; ++$i) {
-            $content[self::getFormatLineNumber($start_line + $i + 1)] = htmlspecialchars($fh->current());
+            $content[$start_line + $i + 1] = htmlspecialchars($fh->current());
             $fh->next();
         }
         self::$err_php_code_arr = $content;
@@ -118,7 +120,6 @@ class ExceptionErrorHandler
         self::$err_line = $err_line;
         self::$err_msg  = '[' . $err_no . '] ' . $err_msg;
         $debugBacktrace = debug_backtrace();
-        $backtrace      = [];
         ksort($debugBacktrace);
         foreach ($debugBacktrace as $k => $error) {
             if ($k === 0) {
@@ -148,25 +149,13 @@ class ExceptionErrorHandler
                 $func            .= isset($error['function']) ? $error['function'] . '([args])' : '';
                 $tmp['function'] = $func;
             }
-            $backtrace[] = $tmp;
+            if (!empty($tmp['file']) && !empty($tmp['line'])) {
+                self::$backtrace[] = $tmp;
+            }
         }
-        self::$backtrace = $backtrace;
+
         self::getPhpCode();
         self::show();
-    }
-
-    /**
-     * 格式化代码行数  前面补0
-     * @param int $line 行数
-     * @return string 格式化后的行数
-     */
-    protected static function getFormatLineNumber($line)
-    {
-        $min    = self::$err_line - 9 < 0 ? 0 : self::$err_line - 9;
-        $max    = $min + 16;
-        $len    = strlen(strval($max));
-        $format = '%0' . $len . 'd';
-        return sprintf($format, $line);
     }
 }
 
