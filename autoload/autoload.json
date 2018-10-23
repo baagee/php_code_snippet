@@ -1,0 +1,13 @@
+{
+  "autoload": {
+    "namespace": {
+      "Src": "./src",
+      "Test": "./test",
+      "Top": "./src/top"
+    },
+    "file": [
+      "./common/functions.php"
+    ]
+  },
+  "cacheFile": "./classMapCache.php"
+}
