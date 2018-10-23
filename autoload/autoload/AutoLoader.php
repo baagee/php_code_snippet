@@ -101,12 +101,10 @@ class AutoLoader
      */
     public function __destruct()
     {
-        if ($this->isCache) {
+        if ($this->isCache && $this->addFlag) {
             // 如果开启缓存，每次运行完都会写入文件，即使没有引入新的类，增加IO操作.
             // 解决思路：判断销毁之前的classMap和初始的classMap是否有增加 决定是否写入
-            if ($this->addFlag) {
-                $this->writeCache();// 缓存
-            }
+            $this->writeCache();// 缓存
         }
     }
 
@@ -130,12 +128,11 @@ class AutoLoader
     private function findFile($className)
     {
         $class_arr = explode('\\', $className);
-        $topSpace  = $class_arr[0];
+        $topSpace  = array_shift($class_arr);
         if (!array_key_exists($topSpace, $this->topSpaceMap)) {
             throw new Exception('Class [' . $className . '] does not exist');
         } else {
             //转换路径
-            unset($class_arr[0]);
             $rightPath     = implode(DIRECTORY_SEPARATOR, $class_arr);
             $leftPath      = rtrim($this->topSpaceMap[$topSpace], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             $fullClassPath = realpath($this->baseDir . $leftPath . $rightPath . '.php');//绝对路径
