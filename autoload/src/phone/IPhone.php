@@ -3,13 +3,13 @@
  * Desc:
  * User: baagee
  * Date: 2018/10/23
- * Time: 下午6:36
+ * Time: 下午10:34
  */
 
-namespace Src;
-class User
+namespace Phone;
+class IPhone
 {
-    public static function test1()
+    public static function run()
     {
         echo __METHOD__ . PHP_EOL;
     }

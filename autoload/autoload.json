@@ -1,13 +1,13 @@
 {
   "autoload": {
     "namespace": {
-      "Src": "./src",
-      "Test": "./test",
-      "Top": "./src/top"
+      "Computer": "./src/computer",
+      "Phone": "src/phone",
+      "Android": "./src/phone/Android"
     },
     "file": [
-      "./common/functions.php"
+      "common/functions.php"
     ]
   },
-  "cacheFile": "./classMapCache.php"
+  "cacheFile": "./autoload/classMapCache.php"
 }

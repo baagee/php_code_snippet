@@ -1,16 +1,15 @@
 <?php
-
 /**
  * Desc:
  * User: baagee
  * Date: 2018/10/23
- * Time: 下午7:14
+ * Time: 下午10:33
  */
 
-namespace Top;
-class Phone
+namespace Android;
+class Oppo
 {
-    public static function call()
+    public static function run()
     {
         echo __METHOD__ . PHP_EOL;
     }
