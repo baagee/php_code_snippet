@@ -11,6 +11,6 @@ class Lenovo
 {
     public static function run()
     {
-        echo __CLASS__ . PHP_EOL;
+        echo __METHOD__ . PHP_EOL;
     }
 }
