@@ -93,7 +93,7 @@ class AutoLoader
             echo $className . ' 自动查找' . PHP_EOL;
         }
         // 引入文件
-        include_once $fullClassPath;
+        include $fullClassPath;
     }
 
     /**

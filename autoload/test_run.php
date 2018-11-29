@@ -11,12 +11,14 @@ include __DIR__ . "/autoload/AutoLoader.php";
 
 
 \Android\Oppo::run();
-
 \Computer\windows\Lenovo::run();
 
 \Computer\Apple::run();
 
 \Phone\IPhone::run();
+
+\Computer\Apple::run();
+
 
 echo add(10, 90) . PHP_EOL;
 echo today();
