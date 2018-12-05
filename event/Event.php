@@ -19,7 +19,7 @@ class Event
      * @param bool $once
      * @return bool
      */
-    public static function listen($event, $callback, $once = false)
+    public static function listen(string $event, callable $callback, bool $once = false)
     {
         if (!is_callable($callback)) return false;
         self::$listens[$event][] = array('callback' => $callback, 'once' => $once);
@@ -31,10 +31,10 @@ class Event
      * @param $callback
      * @return bool
      */
-    public static function one($event, $callback)
-    {
-        return self::listen($event, $callback, true);
-    }
+//    public static function one($event, $callback)
+//    {
+//        return self::listen($event, $callback, true);
+//    }
 
     /**
      * @param      $event
@@ -58,13 +58,13 @@ class Event
         if (!func_num_args()) {
             return '';
         }
-        $args  = func_get_args();
+        $args = func_get_args();
+        var_dump($args);
         $event = array_shift($args);
 
         if (!isset(self::$listens[$event])) {
             return false;
         }
-
         foreach ((array)self::$listens[$event] as $index => $listen) {
             $callback = $listen['callback'];
             $listen['once'] && self::remove($event, $index);
@@ -87,18 +87,18 @@ Event::trigger('walk');
 I am walking...
 I am listening...
 */
-Event::trigger('walk');
+//Event::trigger('walk');
 /*
 I am walking...
 */
 
-Event::one('say', function ($name = '') {
+Event::listen('say', function ($name = '') {
     echo "I am {$name}\n";
-});
-
+}, true);
+//
 Event::trigger('say', 'deeka'); // 输出 I am deeka
-Event::trigger('say', 'deeka'); // not run
-
+Event::trigger('say', 'weeee'); // not run
+//
 class Foo
 {
     public function bar()
@@ -116,10 +116,10 @@ $foo = new Foo;
 
 Event::listen('bar', array($foo, 'bar'));
 Event::trigger('bar');
-
+//
 Event::listen('test', array($foo, 'test'));
 Event::trigger('test', 1, 2, 3);
-
+//
 class Bar
 {
     public static function foo()
@@ -130,7 +130,7 @@ class Bar
 
 Event::listen('bar1', array('Bar', 'foo'));
 Event::trigger('bar1');
-
+//
 Event::listen('bar2', 'Bar::foo');
 Event::trigger('bar2');
 
