@@ -21,16 +21,14 @@ echo 'time=' . (microtime(true) - $start_time) . PHP_EOL;//time=0.36159300804138
 //muti_curl
 
 $start_time = microtime(true);
-$ch_arr     = [];
+$ch_arr     = [];//保存单个的curl_init资源
+$mh         = curl_multi_init();
 for ($i = 0; $i < 10; $i++) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $ch_arr[$i] = $ch;
-}
-$mh = curl_multi_init();
-foreach ($ch_arr as $ch) {
-    curl_multi_add_handle($mh, $ch);
+    curl_multi_add_handle($mh, $ch);//添加
 }
 $runing = 1;
 do {
@@ -39,8 +37,8 @@ do {
 } while ($runing > 0);
 $res = [];
 foreach ($ch_arr as $ch) {
-    $res[] = curl_multi_getcontent($ch);
-    curl_multi_remove_handle($mh, $ch);
+    $res[] = curl_multi_getcontent($ch);//获取请求结果
+    curl_multi_remove_handle($mh, $ch);//移除
 }
 
 curl_multi_close($mh);
@@ -51,14 +49,12 @@ echo 'time=' . (microtime(true) - $start_time) . PHP_EOL;//time=0.12072205543518
 // 并发优化CPU占用高
 $start_time = microtime(true);
 $ch_arr     = [];
+$mh         = curl_multi_init();
 for ($i = 0; $i < 10; $i++) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $ch_arr[$i] = $ch;
-}
-$mh = curl_multi_init();
-foreach ($ch_arr as $ch) {
     curl_multi_add_handle($mh, $ch);
 }
 $runing = 1;
@@ -90,18 +86,17 @@ curl_multi_close($mh);
 //var_dump($res);
 echo 'time=' . (microtime(true) - $start_time) . PHP_EOL;//time=0.11989092826843
 
-//还存在优化的空间, 当某个URL请求完毕之后尽可能快的去处理它, 边处理边等待其他的URL返回,
+
+//3.还存在优化的空间, 当某个URL请求完毕之后尽可能快的去处理它, 边处理边等待其他的URL返回,
 // 而不是等待那个最慢的接口返回之后才开始处理等工作, 从而避免CPU的空闲和浪费
 
 $res        = [];
 $start_time = microtime(true);
-//$ch_arr     = [];
 $mh = curl_multi_init();
 for ($i = 0; $i < 10; $i++) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//    $ch_arr[$i] = $ch;
     curl_multi_add_handle($mh, $ch);
 }
 
@@ -109,19 +104,30 @@ $runing = 1;
 
 do {
     $mc = curl_multi_exec($mh, $runing);
-    while ($done = curl_multi_info_read($mh)) {
+//当返回值等于CURLM_CALL_MULTI_PERFORM时，表明数据还在写入或读取中，执行循环，
+//当第一次$ch句柄的数据写入或读取成功后，返回值变为CURLM_OK，跳出本次循环，进入下面的大循环之中
+} while ($mc == CURLM_CALL_MULTI_PERFORM);
 
+while ($runing && $mc == CURLM_OK) {
+    //阻塞直到cURL批处理连接中有活动连接。成功时返回描述符集合中描述符的数量。失败时，select失败时返回-1
+    if (curl_multi_select($mh) != -1) {
+        //$mh批处理中还有可执行的$ch句柄，curl_multi_select($mh) != -1程序退出阻塞状态。
+        do {
+            //有活动连接时执行
+            $mc = curl_multi_exec($mh, $runing);
+//            echo 'curl_multi_exec' . PHP_EOL;
+        } while ($mc == CURLM_CALL_MULTI_PERFORM);
+    }
+    while ($done = curl_multi_info_read($mh)) {
 //        $info                                     = curl_getinfo($done['handle']);
 //        $error                                    = curl_error($done['handle']);
         $results = curl_multi_getcontent($done['handle']);
-        $res[]   = $results;
 //        echo 'curl_multi_getcontent' . PHP_EOL;
-
+        $res[] = $results;
         curl_multi_remove_handle($mh, $done['handle']);
         curl_close($done['handle']);
     }
-} while ($runing);
-
+}
 curl_multi_close($mh);
 //var_dump($res);
 echo 'time=' . (microtime(true) - $start_time) . PHP_EOL;
@@ -132,6 +138,8 @@ time=0.11273312568665
 time=0.10329294204712
  * */
 
+
+die;
 function multi_post($arrRequests)
 {
     $multiCurlPool = [];
