@@ -2,7 +2,7 @@
 
 /**
  * Desc:委托模式
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/31
  * Time: 上午10:14
  */

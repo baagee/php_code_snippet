@@ -1,7 +1,7 @@
 <?php
 /**
  * Desc: 适配器模式 将一个类的接口转换成客户希望的另外一个接口,使用原本不兼容的而不能在一起工作的那些类可以在一起工作
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/8/9
  * Time: 下午8:33
  */

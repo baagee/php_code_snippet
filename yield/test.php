@@ -2,7 +2,7 @@
 
 /**
  * Desc: 关于PHP yield http://www.laruence.com/2015/05/28/3038.html
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/25
  * Time: 下午3:46
  */

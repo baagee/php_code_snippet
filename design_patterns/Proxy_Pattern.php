@@ -1,7 +1,7 @@
 <?php
 /**
  * Desc: 代理模式，就是给某一对象提供代理对象，并由代理对象控制具体对象的引用
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/23
  * Time: 上午11:05
  */

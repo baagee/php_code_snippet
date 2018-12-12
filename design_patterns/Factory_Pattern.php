@@ -2,7 +2,7 @@
 
 /**
  * Desc: 工厂模式定义一个用于创建对象的接口,让子类决定将哪一个类实例化,使用一个类的实例化延迟到其子类
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/27
  * Time: 下午7:56
  */

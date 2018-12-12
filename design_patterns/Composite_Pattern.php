@@ -1,7 +1,7 @@
 <?php
 /**
  * Desc: 组合模式 将对象组合成树形结构以表示"部分-整体"的层次结构,使得客户对单个对象和复合对象的使用具有一致性
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/22
  * Time: 下午8:32
  */

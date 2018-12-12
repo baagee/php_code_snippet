@@ -2,7 +2,7 @@
 
 /**
  * Desc: 访问者模式 Visitor表示一个作用于某对象结构中的各元素的操作,可以在不改变各元素的类的前提下定义作用于这些元素的新操作
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/8/10
  * Time: 下午8:42
  */

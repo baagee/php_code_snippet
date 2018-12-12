@@ -2,7 +2,7 @@
 
 /**
  * Desc: 装饰器模式：动态的给一个对象添加一些额外的职责,就扩展功能而言比生成子类方式更为灵活
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/8/6
  * Time: 下午3:15
  */

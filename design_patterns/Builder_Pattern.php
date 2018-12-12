@@ -2,7 +2,7 @@
 
 /**
  * Desc:建造者模式 将一个复杂对象的构建与它的表示分离,使用同样的构建过程可以创建不同的表示
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/8/8
  * Time: 上午10:33
  */

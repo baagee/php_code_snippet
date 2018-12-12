@@ -2,7 +2,7 @@
 
 /**
  * Desc: 解释器模式 给定一种语言，定义他的文法的一种表示，并定义一个解释器，该解释器使用该表示来解释语言中句子
- * User: baagee(LiuhuiDang@sf-express.com)
+ * User: baagee()
  * Date: 2018/7/26
  * Time: 下午1:18
  */
