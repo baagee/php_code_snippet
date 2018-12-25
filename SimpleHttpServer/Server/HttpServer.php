@@ -102,12 +102,39 @@ class HttpServer
      */
     public function run()
     {
+        // 主进程
+        $pid = getmypid();
+        ServerLog::record(sprintf("Master process runing pid=%d", $pid));
         while ($client = $this->getClient()) {
             if ($client !== false) {
-                $request = $this->getRequest($client);
-                ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
-                $this->handler($request, new Response(), $client);
-                $this->closeClient($client);
+                // 单进程版
+//                $request = $this->getRequest($client);
+//                ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
+//                $this->handler($request, new Response(), $client);
+//                $this->closeClient($client);
+
+                // 多进程版
+                $pid = pcntl_fork();
+                if ($pid == -1) {
+                    ServerLog::record('fork fail');
+                } elseif ($pid) {
+                    while (true) {
+                        $res = pcntl_waitpid($pid, $status, WNOHANG);
+                        if ($res == -1 || $res > 0) {
+                            $this->closeClient($client);
+                            break;
+                        }
+                    }
+                } else {
+                    // 子进程
+                    $id = getmypid();
+                    ServerLog::record("Child process pid=" . $id);
+                    $request = $this->getRequest($client);
+                    ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
+                    $this->handler($request, new Response(), $client);
+                    ServerLog::record('child over pid=' . $id);
+                    exit();
+                }
             }
         }
     }

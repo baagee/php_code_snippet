@@ -9,8 +9,8 @@
 include_once __DIR__ . '/vendor/autoload.php';
 
 $webroot      = __DIR__ . '/App';
-$ip           = '127.0.0.1';
-$port         = 8888;
+$ip           = '0.0.0.0';
+$port         = 8934;
 $http_log_dir = __DIR__ . '/log';
 try {
     $s = new \SimServer\HttpServer($webroot, $ip, $port, $http_log_dir);
