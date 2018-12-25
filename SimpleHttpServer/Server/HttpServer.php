@@ -29,10 +29,6 @@ class HttpServer
      * @var int 端口号
      */
     protected $port = 8888;
-    /**
-     * @var string Log文件
-     */
-    protected $http_log_file = __DIR__ . '/http.log';
 
     /**
      * @var null|resource
