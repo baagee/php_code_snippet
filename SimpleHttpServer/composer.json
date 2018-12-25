@@ -1,0 +1,17 @@
+{
+  "name": "baagee/simple-http-server",
+  "type": "project",
+  "authors": [
+    {
+      "name": "BaAGee",
+      "email": "2274313786@qq.com"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "SimServer\\": "Server/",
+      "App\\": "App/src/"
+    }
+  }
+}
