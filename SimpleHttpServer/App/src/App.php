@@ -1,6 +1,6 @@
 <?php
 /**
- * Desc:
+ * Desc: 自定义基础app父类
  * User: baagee
  * Date: 2018/12/25
  * Time: 上午11:02
@@ -8,18 +8,19 @@
 
 namespace App;
 
+use SimServer\AppBase;
 use SimServer\Request;
 use SimServer\Response;
 
-class App
+class App extends AppBase
 {
     protected $controller = '';
     protected $action     = '';
 
-    protected $request = null;
-
     public function __construct(Request $request)
     {
+        parent::__construct($request);
+        // /module/controller/action  or /controller/action
         $tmp = explode('/', trim($request->path, '/'));
         if (count($tmp) < 2) {
             Response::setStatusCode(404);

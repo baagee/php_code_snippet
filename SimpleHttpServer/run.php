@@ -8,12 +8,14 @@
 
 include_once __DIR__ . '/vendor/autoload.php';
 
-$webroot      = __DIR__ . '/App';
-$ip           = '0.0.0.0';
-$port         = 8934;
-$http_log_dir = __DIR__ . '/log';
+function getConf()
+{
+    return parse_ini_file(__DIR__ . '/conf.ini');
+}
+
 try {
-    $s = new \SimServer\HttpServer($webroot, $ip, $port, $http_log_dir);
+    extract(getConf());
+    $s = new \SimServer\HttpServer($web_root, $ip, $port, $log_dir, $main_app);
     $s->run();
 } catch (Throwable $e) {
     echo 'Error: ' . $e->getMessage();

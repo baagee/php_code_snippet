@@ -16,7 +16,7 @@ class HttpServer
     /**
      * 默认访问的文件
      */
-    const INDEX = 'index.html';
+    protected $index = 'index.html';
     /**
      * @var string ip地址
      */
@@ -35,18 +35,24 @@ class HttpServer
      */
     protected $socket = null;
 
+    protected $main_app = '';
+
     /**
-     * Server constructor.
-     * @param string $webroot
-     * @param string $ip
-     * @param int    $port
-     * @param string $http_log_dir
+     * HttpServer constructor.
+     * @param string $webroot      根目录
+     * @param string $ip           IP
+     * @param int    $port         端口
+     * @param string $http_log_dir log目录
+     * @param string $main_app     app入口类
+     * @param string $index        默认页面
      */
-    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_dir = __DIR__)
+    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_dir = __DIR__, $main_app = '', $index = 'index.html')
     {
         $this->web_root = $webroot;
         $this->ip       = $ip;
         $this->port     = $port;
+        $this->main_app = $main_app;
+        $this->index    = $index;
         $this->socket   = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         ServerLog::init($http_log_dir);
         $this->bind();
@@ -167,7 +173,7 @@ class HttpServer
         } else {
             if ($request->path == '/') {
                 // 默认index.html
-                $index_file = $this->web_root . DIRECTORY_SEPARATOR . self::INDEX;
+                $index_file = $this->web_root . DIRECTORY_SEPARATOR . $this->index;
                 if (is_file($index_file)) {
                     Response::setHeader('Content-Type', MIMETypes::TEXT_HTML);
                     $response->setBody(file_get_contents($index_file));
@@ -176,14 +182,23 @@ class HttpServer
                 }
             } else {
                 if (!empty($request->path) && $request->path !== '/favicon.ico') {
-                    // /a/b/c  index.php/aa/bb/cc index.html/aa/bb
-                    try {
-                        $app = new \App\App($request);
-                        $res = $app->run();
-                        $response->setBody($res);
-                    } catch (\Throwable $e) {
-                        Response::setStatusCode(500);
-                        ServerLog::record('Server 500 Error:' . $e->getMessage());
+                    // /a/b/c  /aa/bb/cc /aa/bb
+                    if ($this->main_app !== '') {
+                        try {
+                            $app_class = $this->main_app;
+                            $app       = new $app_class($request);
+                            if ($app instanceof AppBase) {
+                                $res = $app->run();
+                                $response->setBody($res);
+                            } else {
+                                throw new \Exception(sprintf("%s not instanceof AppBase", $app_class));
+                            }
+                        } catch (\Throwable $e) {
+                            Response::setStatusCode(500);
+                            ServerLog::record('Server 500 Error:' . $e->getMessage());
+                        }
+                    } else {
+                        Response::setStatusCode(404);
                     }
                 } else {
                     Response::setStatusCode(404);
@@ -204,7 +219,7 @@ class HttpServer
     }
 
     /**
-     *
+     * 关闭链接 socket
      */
     public function __destruct()
     {
