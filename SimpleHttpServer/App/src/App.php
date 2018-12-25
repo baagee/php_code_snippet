@@ -31,7 +31,7 @@ class App
 
     public function run()
     {
-        $controller = 'App\\Controller\\' . $this->controller;
+        $controller = 'App\\Controller\\' . ucfirst($this->controller);
         if (class_exists($controller)) {
             $controller = new $controller();
             $action     = $this->action;
