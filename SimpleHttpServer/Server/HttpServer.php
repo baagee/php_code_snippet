@@ -44,19 +44,15 @@ class HttpServer
      * @param string $webroot
      * @param string $ip
      * @param int    $port
-     * @param string $http_log_file
+     * @param string $http_log_dir
      */
-    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_file = __DIR__ . '/http.log')
+    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_dir = __DIR__)
     {
         $this->web_root = $webroot;
         $this->ip       = $ip;
         $this->port     = $port;
         $this->socket   = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        $http_log_dir   = realpath(dirname($http_log_file));
-        if (!is_dir($http_log_dir)) {
-            mkdir($http_log_dir);
-        }
-        $this->http_log_file = realpath($http_log_file);
+        ServerLog::init($http_log_dir);
         $this->bind();
         $this->listen();
     }
@@ -67,11 +63,11 @@ class HttpServer
     protected function listen()
     {
         if (socket_listen($this->socket, 4) === false) {
-            $this->log(sprintf('socket_listen failed %s', socket_strerror(socket_last_error())));
+            ServerLog::record(sprintf('socket_listen failed %s', socket_strerror(socket_last_error())));
             die;
         }
-        $this->log(sprintf('socket listening on %s:%d', $this->ip, $this->port));
-        $this->log(sprintf('http://%s:%d', $this->ip, $this->port));
+        ServerLog::record(sprintf('socket listening on %s:%d', $this->ip, $this->port));
+        ServerLog::record(sprintf('http://%s:%d', $this->ip, $this->port));
     }
 
     /**
@@ -80,20 +76,9 @@ class HttpServer
     protected function bind()
     {
         if (socket_bind($this->socket, $this->ip, $this->port) === false) {
-            $this->log(sprintf('socket_bind failed on %s:%d %s', $this->ip, $this->port, socket_strerror(socket_last_error())));
+            ServerLog::record(sprintf('socket_bind failed on %s:%d %s', $this->ip, $this->port, socket_strerror(socket_last_error())));
             die;
         }
-    }
-
-    /**
-     * 记录Log信息
-     * @param $msg
-     */
-    protected function log($msg)
-    {
-        $str = '[' . date('Y-m-d H:i:s') . '] ' . $msg . PHP_EOL;
-        echo $str;
-        file_put_contents($this->http_log_file, $str, FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -124,7 +109,7 @@ class HttpServer
         while ($client = $this->getClient()) {
             if ($client !== false) {
                 $request = $this->getRequest($client);
-                $this->log('Request:' . PHP_EOL . $request->raw_request);
+                ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
                 $this->handler($request, new Response(), $client);
                 $this->closeClient($client);
             }
@@ -169,7 +154,7 @@ class HttpServer
                         $response->setBody($res);
                     } catch (\Throwable $e) {
                         Response::setStatusCode(500);
-                        $this->log('Server 500 Error:' . $e->getMessage());
+                        ServerLog::record('Server 500 Error:' . $e->getMessage());
                     }
                 } else {
                     Response::setStatusCode(404);
@@ -186,7 +171,7 @@ class HttpServer
     public function closeClient($client)
     {
         socket_close($client);
-        $this->log('Client closed' . PHP_EOL . str_repeat('-', 60));
+        ServerLog::record('Client closed' . PHP_EOL . str_repeat('-', 60));
     }
 
     /**

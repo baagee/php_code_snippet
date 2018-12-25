@@ -24,8 +24,8 @@ class App
         if (count($tmp) < 2) {
             Response::setStatusCode(404);
         }
-        $this->controller = $tmp[0];
-        $this->action     = $tmp[1];
+        $this->controller = $tmp[0] ?? '';
+        $this->action     = $tmp[1] ?? '';
         $this->request    = $request;
     }
 
