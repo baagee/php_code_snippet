@@ -127,7 +127,7 @@ class HttpServer
                     // 多进程版
                     $pid = pcntl_fork();
                     if ($pid == -1) {
-                        ServerLog::record('fork fail');
+                        ServerLog::record('Fork fail');
                     } elseif ($pid) {
                         while (true) {
                             $res = pcntl_waitpid($pid, $status, WNOHANG);
@@ -143,7 +143,7 @@ class HttpServer
                         $request = $this->getRequest($client);
                         ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
                         $this->handler($request, new Response(), $client);
-                        ServerLog::record('child over pid=' . $id);
+                        ServerLog::record('Child over pid=' . $id);
                         exit();
                     }
                 }
@@ -181,24 +181,20 @@ class HttpServer
                     $response->setStatusCode(404);
                 }
             } else {
-                if (!empty($request->path) && $request->path !== '/favicon.ico') {
+                if (!empty($request->path) && $request->path !== '/favicon.ico' && $this->main_app !== '') {
                     // /a/b/c  /aa/bb/cc /aa/bb
-                    if ($this->main_app !== '') {
-                        try {
-                            $app_class = $this->main_app;
-                            $app       = new $app_class($request);
-                            if ($app instanceof AppBase) {
-                                $res = $app->run();
-                                $response->setBody($res);
-                            } else {
-                                throw new \Exception(sprintf("%s not instanceof AppBase", $app_class));
-                            }
-                        } catch (\Throwable $e) {
-                            Response::setStatusCode(500);
-                            ServerLog::record('Server 500 Error:' . $e->getMessage());
+                    try {
+                        $app_class = $this->main_app;
+                        $app       = new $app_class($request);
+                        if ($app instanceof AppBase) {
+                            $res = $app->run();
+                            $response->setBody($res);
+                        } else {
+                            throw new \Exception(sprintf("%s not instanceof AppBase", $app_class));
                         }
-                    } else {
-                        Response::setStatusCode(404);
+                    } catch (\Throwable $e) {
+                        Response::setStatusCode(500);
+                        ServerLog::record('Server 500 Error:' . $e->getMessage());
                     }
                 } else {
                     Response::setStatusCode(404);
