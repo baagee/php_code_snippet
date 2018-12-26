@@ -64,7 +64,7 @@ class HttpServer
      */
     protected function listen()
     {
-        if (socket_listen($this->socket, 4) === false) {
+        if (!socket_listen($this->socket, 4)) {
             ServerLog::record(sprintf('socket_listen failed %s', socket_strerror(socket_last_error())));
             die;
         }
@@ -81,7 +81,7 @@ class HttpServer
             ServerLog::record('Unable to set option on socket: ' . socket_strerror(socket_last_error()));
             die;
         }
-        if (socket_bind($this->socket, $this->ip, $this->port) === false) {
+        if (!socket_bind($this->socket, $this->ip, $this->port)) {
             ServerLog::record(sprintf('socket_bind failed on %s:%d %s', $this->ip, $this->port, socket_strerror(socket_last_error())));
             die;
         }
@@ -93,8 +93,7 @@ class HttpServer
      */
     protected function getClient()
     {
-        $client = socket_accept($this->socket);
-        return $client;
+        return socket_accept($this->socket);
     }
 
     /**
