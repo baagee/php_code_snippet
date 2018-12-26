@@ -98,6 +98,7 @@ class Response
     {
         self::$headers = [];
         self::$code    = 200;
+        self::$cookie  = [];
     }
 
     /**
