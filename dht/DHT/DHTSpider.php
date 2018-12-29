@@ -127,16 +127,15 @@ class DHTSpider
         try {
             $client = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
             if (!@$client->connect($ip, $port, 3)) {
-                echo(sprintf('%s:%d Connect failed! Error: %s', $ip, $port, $client->errCode) . PHP_EOL);
+//                echo(sprintf('%s:%d Connect failed! Error: %s', $ip, $port, $client->errCode) . PHP_EOL);
             } else {
-                echo $ip . ':' . $port . 'Connect success!' . PHP_EOL;
+//                echo $ip . ':' . $port . 'Connect success!' . PHP_EOL;
                 MetaData::downloadMetadata($client, $infoHash);
                 $client->close();
             }
         } catch (\Throwable $e) {
-            echo 'Error: ' . $e->getMessage() . PHP_EOL;
+            echo sprintf('Error: %s:%d,%s' . PHP_EOL, $e->getFile(), $e->getLine(), $e->getMessage());
         }
-//        $server->finish("OK");
         return 'ok';
     }
 

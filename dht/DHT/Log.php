@@ -14,7 +14,7 @@ class Log
     public static function log($str)
     {
         $str = sprintf('[%s] %s' . PHP_EOL, date('Y-m-d H:i:s'), $str);
-        echo $str;
+//        echo $str;
         file_put_contents(self::LOG_FILE, $str, FILE_APPEND | LOCK_EX);
     }
 }

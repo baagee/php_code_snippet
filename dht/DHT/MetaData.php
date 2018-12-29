@@ -42,76 +42,71 @@ class MetaData
      */
     public static function downloadMetadata(Client $client, $infoHash)
     {
-        try {
-            $packet = self::sendHandShake($client, $infoHash);
-            if ($packet === false) {
-                return false;
-            }
-            if (self::checkHandshake($packet, $infoHash) === false) {
-                return false;
-            }
-            $packet = self::sendExtHandshake($client);
-            if ($packet === false) {
-                return false;
-            }
-
-            $metadata_size = self::getMetadataSize($packet);
-            if ($metadata_size > self::$PIECE_LENGTH * 1000) {
-                return false;
-            }
-            $metadata  = array();
-            $piecesNum = ceil($metadata_size / (self::$PIECE_LENGTH));//2 ^ 14
-
-            $ut_metadata = self::getUtMetadata($packet);
-
-            for ($i = 0; $i < $piecesNum; $i++) {
-                if (self::requestMetadata($client, $ut_metadata, $i) === false) {
-                    return false;
-                }
-
-                $packet = self::recvAll($client);
-                if ($packet === false) {
-                    return false;
-                }
-
-                $ee   = substr($packet, 0, strpos($packet, "ee") + 2);
-                $dict = Decoder::decode(substr($ee, strpos($packet, "d")));
-
-                if (isset($dict['msg_type']) && $dict['msg_type'] != 1) {
-                    return false;
-                }
-
-                $_metadata = substr($packet, strpos($packet, "ee") + 2);
-
-                if (strlen($_metadata) > self::$PIECE_LENGTH) {
-                    return false;
-                }
-
-                $metadata[] = $_metadata;
-            }
-            $metadata = implode('', $metadata);
-
-            $_data     = [];
-            $metadata  = Decoder::decode($metadata);
-            $_infohash = strtoupper(bin2hex($infoHash));
-            if (isset($metadata['name']) && $metadata['name'] != '') {
-                $_data['name']        = Tools::character($metadata['name']);
-                $_data['infoHash']    = $_infohash;
-                $_data['files']       = isset($metadata['files']) ? $metadata['files'] : '';
-                $_data['length']      = isset($metadata['length']) ? $metadata['length'] : 0;
-                $_data['pieceLength'] = isset($metadata['piece length']) ? $metadata['piece length'] : 0;
-                //$_data['length_format'] = Func::sizecount($_data['length']);
-                $_data['magnetUrl'] = 'magnet:?xt=urn:btih:' . $_infohash;
-                unset($metadata);
-            } else {
-                return false;
-            }
-            Log::log(json_encode($_data, JSON_UNESCAPED_UNICODE));
-            return $_data;
-        } catch (\Exception $e) {
-            $client->close();
-            echo __METHOD__ . ' ' . $e->getMessage() . PHP_EOL;
+        $packet = self::sendHandShake($client, $infoHash);
+        if ($packet === false) {
+            return false;
         }
+        if (self::checkHandshake($packet, $infoHash) === false) {
+            return false;
+        }
+        $packet = self::sendExtHandshake($client);
+        if ($packet === false) {
+            return false;
+        }
+
+        $metadata_size = self::getMetadataSize($packet);
+        if ($metadata_size > self::$PIECE_LENGTH * 1000) {
+            return false;
+        }
+        $metadata  = array();
+        $piecesNum = ceil($metadata_size / (self::$PIECE_LENGTH));//2 ^ 14
+
+        $ut_metadata = self::getUtMetadata($packet);
+
+        for ($i = 0; $i < $piecesNum; $i++) {
+            if (self::requestMetadata($client, $ut_metadata, $i) === false) {
+                return false;
+            }
+
+            $packet = self::recvAll($client);
+            if ($packet === false) {
+                return false;
+            }
+
+            $ee   = substr($packet, 0, strpos($packet, "ee") + 2);
+            $dict = Decoder::decode(substr($ee, strpos($packet, "d")));
+
+            if (isset($dict['msg_type']) && $dict['msg_type'] != 1) {
+                return false;
+            }
+
+            $_metadata = substr($packet, strpos($packet, "ee") + 2);
+
+            if (strlen($_metadata) > self::$PIECE_LENGTH) {
+                return false;
+            }
+
+            $metadata[] = $_metadata;
+        }
+        $metadata = implode('', $metadata);
+
+        $_data     = [];
+        $metadata  = Decoder::decode($metadata);
+        $_infohash = strtoupper(bin2hex($infoHash));
+        if (isset($metadata['name']) && $metadata['name'] != '') {
+            $_data['name']        = Tools::character($metadata['name']);
+            $_data['infoHash']    = $_infohash;
+            $_data['files']       = isset($metadata['files']) ? $metadata['files'] : '';
+            $_data['length']      = isset($metadata['length']) ? $metadata['length'] : 0;
+            $_data['pieceLength'] = isset($metadata['piece length']) ? $metadata['piece length'] : 0;
+            //$_data['length_format'] = Func::sizecount($_data['length']);
+            $_data['magnetUrl'] = 'magnet:?xt=urn:btih:' . $_infohash;
+            unset($metadata);
+        } else {
+            return false;
+        }
+        Log::log(json_encode($_data, JSON_UNESCAPED_UNICODE));
+        return $_data;
     }
 
     /**
