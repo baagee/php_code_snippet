@@ -112,9 +112,8 @@ class demo1
     /**
      * demo1 constructor.
      */
-    public function __construct($age)
+    public function __construct()
     {
-        var_dump($age);
         echo __CLASS__ . PHP_EOL;
     }
 }
