@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4": {
+            "DHT\\": "DHT/"
+        }
+    },
+    "require": {
+        "rych/bencode": "^1.0"
+    }
+}
