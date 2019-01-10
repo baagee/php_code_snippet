@@ -35,25 +35,35 @@ class HttpServer
      */
     protected $socket = null;
 
+    /**
+     * @var int
+     */
+    protected $worker_number = 5;
+
+    /**
+     * @var string
+     */
     protected $main_app = '';
 
     /**
      * HttpServer constructor.
-     * @param string $webroot      根目录
-     * @param string $ip           IP
-     * @param int    $port         端口
-     * @param string $http_log_dir log目录
-     * @param string $main_app     app入口类
-     * @param string $index        默认页面
+     * @param string $webroot       根目录
+     * @param string $ip            IP
+     * @param int    $port          端口
+     * @param string $http_log_dir  log目录
+     * @param string $main_app      app入口类
+     * @param string $index         默认页面
+     * @param int    $worker_number 子进程数量
      */
-    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_dir = __DIR__, $main_app = '', $index = 'index.html')
+    public function __construct($webroot, $ip = '127.0.0.1', $port = 8888, $http_log_dir = __DIR__, $main_app = '', $index = 'index.html', $worker_number = 5)
     {
-        $this->web_root = $webroot;
-        $this->ip       = $ip;
-        $this->port     = $port;
-        $this->main_app = $main_app;
-        $this->index    = $index;
-        $this->socket   = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->web_root      = $webroot;
+        $this->ip            = $ip;
+        $this->port          = $port;
+        $this->main_app      = $main_app;
+        $this->index         = $index;
+        $this->worker_number = $worker_number;
+        $this->socket        = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         ServerLog::init($http_log_dir);
         $this->bind();
         $this->listen();
@@ -111,39 +121,34 @@ class HttpServer
      */
     public function run()
     {
-        // 主进程
-        $pid = getmypid();
-        ServerLog::record(sprintf("Master process runing pid=%d", $pid));
-        while ($client = $this->getClient()) {
-            if ($client !== false) {
-                if (!function_exists('pcntl_fork')) {
-                    // 单进程版
+        if (!function_exists('pcntl_fork')) {
+            // 单进程版
+            while ($client = $this->getClient()) {
+                if ($client !== false) {
                     $request = $this->getRequest($client);
                     ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
                     $this->handler($request, new Response(), $client);
                     $this->closeClient($client);
-                } else {
-                    // 多进程版
-                    $pid = pcntl_fork();
-                    if ($pid == -1) {
-                        ServerLog::record('Fork fail');
-                    } elseif ($pid) {
-                        while (true) {
-                            $res = pcntl_waitpid($pid, $status, WNOHANG);
-                            if ($res == -1 || $res > 0) {
-                                $this->closeClient($client);
-                                break;
-                            }
+                }
+            }
+        } else {
+            // 多进程版
+            for ($i = 1; $i <= $this->worker_number; $i++) {
+                $pid = pcntl_fork();
+                if ($pid == -1) {
+                    ServerLog::record('Fork fail');
+                } elseif ($pid == 0) {
+                    // 子进程
+                    $id = getmypid();
+                    ServerLog::record("Child process pid=" . $id);
+                    while ($client = $this->getClient()) {
+                        if ($client !== false) {
+                            $request = $this->getRequest($client);
+                            ServerLog::record('Child pid=' . $id . ' get request:' . PHP_EOL . $request->raw_request);
+                            $this->handler($request, new Response(), $client);
+                            ServerLog::record('Child over pid=' . $id);
+                            $this->closeClient($client);
                         }
-                    } else {
-                        // 子进程
-                        $id = getmypid();
-                        ServerLog::record("Child process pid=" . $id);
-                        $request = $this->getRequest($client);
-                        ServerLog::record('Request:' . PHP_EOL . $request->raw_request);
-                        $this->handler($request, new Response(), $client);
-                        ServerLog::record('Child over pid=' . $id);
-                        exit();
                     }
                 }
             }

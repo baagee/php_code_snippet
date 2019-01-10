@@ -6,7 +6,7 @@
  * Date: 2018/8/21
  * Time: 下午3:14
  */
-class DI
+class ReflectionDI2
 {
     /**
      * @var array
@@ -17,7 +17,7 @@ class DI
      * @param $k
      * @param $v
      */
-    public static function set($k, $v)
+    public function __set($k, $v)
     {
         self::$data[$k] = $v;
     }
@@ -27,9 +27,9 @@ class DI
      * @return mixed|object
      * @throws Exception
      */
-    public static function get($k)
+    public function __get($k)
     {
-        return self::build(self::$data[$k]);
+        return $this->build(self::$data[$k]);
     }
 
     /**
@@ -38,11 +38,11 @@ class DI
      * @return mixed|object
      * @throws ReflectionException
      */
-    protected static function build($className)
+    public function build($className)
     {
         // 如果是匿名函数，直接执行，并返回结果
         if ($className instanceof Closure) {
-            return $className();
+            return $className($this);
         }
         // 已经是实例化对象的话，直接返回
         if (is_object($className)) {
@@ -63,26 +63,26 @@ class DI
         // 获取构造函数参数
         $params = $constructor->getParameters();
         // 解析构造函数
-        $dependencies = self::getDependencies($params);
+        $dependencies = $this->getDependencies($params);
         // 创建新实例
         return $ref->newInstanceArgs($dependencies);
     }
 
     /**
      * 分析参数，如果参数中出现依赖类，递归实例化
-     * @param array $params
+     * @param $params
      * @return array
      * @throws ReflectionException
      */
-    protected static function getDependencies(array $params)
+    public function getDependencies($params)
     {
         $data = [];
         foreach ($params as $param) {
             $tmp = $param->getClass();
             if (is_null($tmp)) {
-                $data[] = self::setDefault($param);
+                $data[] = $this->setDefault($param);
             } else {
-                $data[] = self::build($tmp->name);
+                $data[] = $this->build($tmp->name);
             }
         }
         return $data;
@@ -94,7 +94,7 @@ class DI
      * @return mixed
      * @throws Exception
      */
-    protected static function setDefault(ReflectionParameter $param)
+    public function setDefault(ReflectionParameter $param)
     {
         if ($param->isDefaultValueAvailable()) {
             return $param->getDefaultValue();
@@ -112,10 +112,9 @@ class demo1
     /**
      * demo1 constructor.
      */
-    public function __construct($a)
+    public function __construct()
     {
-        $this->a = $a;
-        var_dump($this);
+        echo __CLASS__ . PHP_EOL;
     }
 }
 
@@ -124,7 +123,6 @@ class demo1
  */
 class Demo
 {
-    public $a='';
     /**
      * Demo constructor.
      * @param demo1 $b
@@ -132,20 +130,12 @@ class Demo
      */
     public function __construct(demo1 $b, $a = 1)
     {
-        $this->demo1 = $b;
-        $this->a     = $a;
-        var_dump($this);
+        echo __CLASS__ . PHP_EOL;
+        var_dump($a, $b);
     }
 }
 
-DI::set('demo1', function () {
-    return new demo1(3);
-});
-DI::set('demo', function () {
-    return new Demo(DI::get('demo1'), 2);
-});
+$di       = new DI();
+$di->demo = Demo::class;
 
-var_dump(DI::get('demo'));
-var_dump(DI::get('demo'));
-
-//var_dump(DI::getAll());
+var_dump($di->demo);

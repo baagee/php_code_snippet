@@ -15,7 +15,7 @@ function getConf()
 
 try {
     extract(getConf());
-    $s = new \SimServer\HttpServer($web_root, $ip, $port, $log_dir, $main_app);
+    $s = new \SimServer\HttpServer($web_root, $ip, $port, $log_dir, $main_app, $index, $worker_number);
     $s->run();
 } catch (Throwable $e) {
     echo 'Error: ' . $e->getMessage();
