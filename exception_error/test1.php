@@ -12,11 +12,13 @@ class ExceptionErrorHandle
 {
     protected static $err_file = '';
     protected static $err_line = 0;
-    private const ERROR_TYPE_ARRAY = array(
-        E_ERROR             => 'Error',
-        E_WARNING           => 'Warning',
-        E_PARSE             => 'Parsing Error',
-        E_NOTICE            => 'Notice',
+    protected static $err_msg  = '';
+    protected static $err_code = 0;
+    public const ERROR_TYPE_ARRAY = array(
+        E_ERROR             => 'Fatal Error',
+        E_WARNING           => 'Warning',//
+        E_PARSE             => 'Parse Error',
+        E_NOTICE            => 'Notice',//
         E_CORE_ERROR        => 'Core Error',
         E_CORE_WARNING      => 'Core Warning',
         E_COMPILE_ERROR     => 'Compile Error',
@@ -24,19 +26,11 @@ class ExceptionErrorHandle
         E_USER_ERROR        => 'User Error',
         E_USER_WARNING      => 'User Warning',
         E_USER_NOTICE       => 'User Notice',
-        E_STRICT            => 'Runtime Notice',
-        E_RECOVERABLE_ERROR => 'Catchable Fatal Error'
+        E_STRICT            => 'Strict',//
+        E_RECOVERABLE_ERROR => 'Recoverable Error',//
+        E_DEPRECATED        => 'Deprecated',//
+        E_USER_DEPRECATED   => 'User Deprecated'
     );
-
-    public static function getErrorFile()
-    {
-        return self::$err_file;
-    }
-
-    public static function getErrorLine()
-    {
-        return self::$err_line;
-    }
 
     protected static function getErrorType($err_no)
     {
@@ -66,6 +60,8 @@ class ExceptionErrorHandle
         echo 'Line: ' . self::$err_line . PHP_EOL;
         echo 'Code: ' . $exception->getCode() . PHP_EOL;
         echo 'Message: ' . $exception->getMessage() . PHP_EOL;
+        // getPHPCode
+        // show
         die;
     }
 
@@ -96,11 +92,49 @@ function printErrorException($err_msg, $err_file, $err_line, $err_code)
     echo 'Message: ' . $err_msg . PHP_EOL;
 }
 
-include_once './errorl.php';
 
-// try {
-//     aaa();
-//     include_once './error.php';
-// } catch (Throwable $t) {
-//     printErrorException($t->getMessage(), $t->getFile(), $t->getLine(), $t->getCode());
-// }
+function error_log_($err_msg, $err_file, $err_line, $err_code, $err_type)
+{
+    echo 'Error Type: ' . $err_type . PHP_EOL;
+    echo 'File: ' . $err_file . PHP_EOL;
+    echo 'Line: ' . $err_line . PHP_EOL;
+    echo 'Code: ' . $err_code . PHP_EOL;
+    echo 'Message: ' . $err_msg . PHP_EOL;
+}
+
+function getErrorType($err_code)
+{
+    return ExceptionErrorHandle::ERROR_TYPE_ARRAY[$err_code] ?? '';
+}
+fgsfsd();
+// include_once './error.php';
+
+try {
+    aaa();
+    // new adfa();
+    include_once './error.php';
+} catch (Throwable $e) {
+    $err_msg  = $e->getMessage();
+    $err_code = $e->getCode();
+    $err_file = $e->getFile();
+    $err_line = $e->getLine();
+    if ($e instanceof Error) {
+        if ($prev = $e->getPrevious()) {
+            if ($prev instanceof ErrorException) {
+                $err_file = $prev->getFile();
+                $err_line = $prev->getLine();
+            }
+        }
+        $err_type = getErrorType($err_code);
+        if ($err_type == '') {
+            if (strtolower(get_class($e)) == 'parseerror') {
+                $err_type = 'Parse Error';
+            } else {
+                $err_type = 'Fatal Error';
+            }
+        }
+        error_log_($err_msg, $err_file, $err_line, $err_code, $err_type);
+    } else {
+        printErrorException($e->getMessage(), $e->getFile(), $e->getLine(), $e->getCode());
+    }
+}
