@@ -150,6 +150,7 @@ class HttpServer
                             $this->closeClient($client);
                         }
                     }
+                    exit(0);
                 }
             }
         }
