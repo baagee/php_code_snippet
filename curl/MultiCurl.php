@@ -162,7 +162,6 @@ function multi_post($arrRequests)
 
 //        $proxyInfo = $this->getProxyServer();
 //        if (empty($proxyInfo)) {
-//            \Sftcwl\Log\RpcLog::warning('service config need http proxy; but proxy ip empty');
 //        } else {
 //            curl_setopt($multiCurlPool[$reqKey], CURLOPT_PROXY, $proxyInfo["ip"]); //代理服务器地址
 //            curl_setopt($multiCurlPool[$reqKey], CURLOPT_PROXYPORT, $proxyInfo["port"]); //代理服务器端口
@@ -194,11 +193,9 @@ function multi_post($arrRequests)
 
             if ($errno == 0) {
                 $content = curl_multi_getcontent($done['handle']);
-                \Sftcwl\Log\RpcLog::notice("eleme_sdk request ok ");
 
             } else {
                 $content = false;
-                \Sftcwl\Log\RpcLog::warning("eleme_sdk request error: [" . $errno . ']' . $err);
 
             }
 
