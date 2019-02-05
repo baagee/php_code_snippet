@@ -6,25 +6,29 @@
  * Time: 下午5:22
  */
 
+$param1 = [1, 2, 3];
+$param3 = 9;
+$res=array_reduce($param1, function ($last, $item) {
+    $last += $item;
+    return $last;
+}, $param3);
+// var_dump($res);
+/**
+ * array_reduce
+ *  param1 array
+ *  param2 callable function ($lastValue,$param1ItemValue)
+ *          $lastValue 上次迭代回调函数里的值； 如果本次迭代是第一次，那么这个值是 param3
+ *  param3 可选，default null，初始化的$lastValue值
+ */
+
+
+// 等价于
+
 function sum($last, $item)
 {
     $last += $item;
     return $last;
 }
-
-$param1 = [1, 2, 3];
-$param2 = 'sum';
-$param3 = 9;
-// var_dump(array_reduce($param1, $param2,$param3));
-/**
- * array_reduce
- *  param1 array
- *  param2 callable function ($lastValue,$param1ItemValue)
- *          $lastValue 上次迭代里的值； 如果本次迭代是第一次，那么这个值是 param3
- *  param3 可选，default null，初始化的$lastValue值
- */
-
-// 等价于
 foreach ($param1 as $param1ItemValue) {
     $param3 = sum($param3, $param1ItemValue);
 }
@@ -91,8 +95,8 @@ class CatchError extends MidAbs
     {
         print "开始 " . __CLASS__ . " 逻辑" . PHP_EOL;
         $ret = [
-            'code'=>0,
-            'message'=>''
+            'code'    => 0,
+            'message' => ''
         ];
         try {
             $data        .= __CLASS__ . '; ';
@@ -197,20 +201,45 @@ class Pipeline
      */
     public function then(\Closure $destination)
     {
-        $arrive = array_reduce(array_reverse($this->middleware_array), function ($stack, $middleware) {
-            // 返回一个闭包 arrive接收
-            return function ($request) use ($stack, $middleware) {
-                // 获取此中间件的对象
-                $middlewareObj = new $middleware();
-                if ($middlewareObj instanceof MidAbs) {
-                    // 调用中间件
-                    return $middlewareObj->{self::MIDDLEWARE_METHOD}($stack, $request);
-                } else {
-                    $err_msg = is_object($middlewareObj) ? get_class($middlewareObj) : gettype($middlewareObj) . ' not instanceof ' . MidAbs::class;
-                    throw new ErrorException($err_msg);
-                }
-            };
-        }, $destination);
+        $arrive = array_reduce(
+            array_reverse($this->middleware_array),//第一个参数是反转的中间件列表
+            /**
+             * $stack 上一次此函数返回值 闭包
+             * $middleware 此次中间件名字
+             */
+            function (Closure $stack, $middleware) {
+                // 返回一个闭包 作为下次$stack的值进入 最后由$arrive接收
+                // 循环中，每次调用回调函数就生成一个闭包匿名函数
+                /**
+                 * 第一次循环
+                 *      $stack=$destination  $middleware=BLogic
+                 *      return BLogic{$destination()}
+                 *
+                 * 第二次循环
+                 *      $stack=BLogic{$destination()}  $middleware=ALogic
+                 *      return ALogic{BLogic{$destination()}}
+                 *
+                 * 第三次循环
+                 *      $stack=ALogic{BLogic{$destination()}}  $middleware=CatchError
+                 *      return CatchError{ALogic{BLogic{$destination()}}}
+                 *
+                 * 第四次循环
+                 *      $stack=CatchError{ALogic{BLogic{$destination()}}}  $middleware=ReturnJson
+                 *      return ReturnJson{CatchError{ALogic{BLogic{$destination()}}}}
+                 */
+                return function ($request) use ($stack, $middleware) {
+                    // 获取此中间件的对象
+                    $middlewareObj = new $middleware();
+                    if ($middlewareObj instanceof MidAbs) {
+                        // 调用中间件
+                        return $middlewareObj->{self::MIDDLEWARE_METHOD}($stack, $request);
+                    } else {
+                        throw new ErrorException($middleware . ' not instanceof ' . MidAbs::class);
+                    }
+                };
+            },
+            $destination
+        );
         // 调用arrive
         return call_user_func($arrive, $this->data);
     }
