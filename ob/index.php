@@ -9,7 +9,8 @@
 echo __LINE__ . ': ob_level=' . ob_get_level() . '<br>';//1
 
 ob_start();
-echo time();
+echo time().'<br>';
+echo __LINE__ . ': ob_level=' . ob_get_level() . '<br>';//1
 
 ob_start();
 echo '<br>222<br>';

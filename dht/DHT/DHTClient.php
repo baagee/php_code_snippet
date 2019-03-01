@@ -25,7 +25,7 @@ trait DHTClient
             // 否则伪造一个相邻id
             $target = Tools::getNeighbor($id, DHTSpider::getNodeId());
         }
-//        echo '查找朋友 ' . $ip . ' 是否在线' . PHP_EOL;
+       // echo '查找朋友 ' . $ip . ' 是否在线' . PHP_EOL;
         // 定义发送数据 认识新朋友的。
         $msg = array(
             't' => Tools::randomString(2),
