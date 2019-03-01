@@ -129,7 +129,7 @@ trait DHTServer
         if (substr($infoHash, 0, 3) != $token)
             return;
 
-        if (!(isset($msg['a']['implied_port']) && $msg['a']['implied_port'] != 0)) {
+        if ((isset($msg['a']['implied_port']) && $msg['a']['implied_port'] != 0)) {
             $port = $msg['a']['port'];
         }
         if ($port >= 65536 || $port <= 0) {

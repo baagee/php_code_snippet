@@ -28,7 +28,7 @@ class DHTSpider
     protected $config = [
         'ip'              => '0.0.0.0',
         'port'            => 7890,
-        'worker_num'      => 3,
+        'worker_num'      => 2,
         'daemonize'       => false,
         // 'task_worker_num' => 2
     ];
