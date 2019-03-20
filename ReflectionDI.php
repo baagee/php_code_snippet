@@ -6,20 +6,34 @@
  * Date: 2018/8/21
  * Time: 下午3:14
  */
+ini_set('display_errors', 1);
+error_reporting(E_ALL & ~E_NOTICE);
+
 class DI
 {
     /**
-     * @var array
+     * @var array 保存对象
      */
-    protected static $data = [];
+    protected static $container = [];
 
     /**
-     * @param $k
-     * @param $v
+     * 添加对象
+     * @param string $k 名字
+     * @param mixed  $v 类名或者匿名函数
+     * @return bool 成功返回true
+     * @throws Exception
      */
-    public static function set($k, $v)
+    final public static function set(string $k, $v)
     {
-        self::$data[$k] = $v;
+        if (isset(self::$container[$k]) && self::$container[$k]['build']) {
+            throw new Exception($k . '已经存在并且实例化了');
+        } else {
+            self::$container[$k] = [
+                'instance' => $v,// 保存实例
+                'build'    => false//标记是否实例了
+            ];
+            return true;
+        }
     }
 
     /**
@@ -27,38 +41,44 @@ class DI
      * @return mixed|object
      * @throws Exception
      */
-    public static function get($k)
+    final public static function get($k)
     {
-        return self::build(self::$data[$k]);
+        if (!isset(self::$container[$k])) {
+            return null;
+        } else {
+            if (!self::$container[$k]['build']) {
+                self::$container[$k] = [
+                    'instance' => self::build(self::$container[$k]['instance']),
+                    'build'    => true
+                ];
+            }
+            return self::$container[$k]['instance'];
+        }
     }
 
     /**
      * 获取实例
-     * @param $className
+     * @param $new
      * @return mixed|object
      * @throws ReflectionException
      */
-    protected static function build($className)
+    protected static function build($new)
     {
         // 如果是匿名函数，直接执行，并返回结果
-        if ($className instanceof Closure) {
-            return $className();
-        }
-        // 已经是实例化对象的话，直接返回
-        if (is_object($className)) {
-            return $className;
+        if ($new instanceof Closure) {
+            return call_user_func($new);
         }
         // 如果是类的话，使用反射加载
-        $ref = new ReflectionClass($className);
+        $ref = new \ReflectionClass($new);
         // 监测类是否可实例化
         if (!$ref->isInstantiable()) {
-            throw new Exception('class' . $className . ' not instanceable');
+            throw new Exception('class' . $new . ' not instanceable');
         }
         // 获取构造函数
         $constructor = $ref->getConstructor();
         // 无构造函数，直接实例化返回
         if (is_null($constructor)) {
-            return new $className;
+            return new $new;
         }
         // 获取构造函数参数
         $params = $constructor->getParameters();
@@ -76,16 +96,16 @@ class DI
      */
     protected static function getDependencies(array $params)
     {
-        $data = [];
+        $container = [];
         foreach ($params as $param) {
             $tmp = $param->getClass();
             if (is_null($tmp)) {
-                $data[] = self::setDefault($param);
+                $container[] = self::setDefault($param);
             } else {
-                $data[] = self::build($tmp->name);
+                $container[] = self::build($tmp->name);
             }
         }
-        return $data;
+        return $container;
     }
 
     /**
@@ -109,13 +129,16 @@ class DI
  */
 class demo1
 {
+    protected $a = '';
+
     /**
      * demo1 constructor.
+     * @param $a
      */
     public function __construct($a)
     {
         $this->a = $a;
-        var_dump($this);
+        echo __METHOD__ . PHP_EOL;
     }
 }
 
@@ -124,7 +147,9 @@ class demo1
  */
 class Demo
 {
-    public $a='';
+    public    $a     = '';
+    protected $demo1 = null;
+
     /**
      * Demo constructor.
      * @param demo1 $b
@@ -134,18 +159,36 @@ class Demo
     {
         $this->demo1 = $b;
         $this->a     = $a;
-        var_dump($this);
+        echo __METHOD__ . PHP_EOL;
+    }
+}
+
+class demo2
+{
+    protected $a = 'sdfs';
+
+    public function test1()
+    {
+        echo __METHOD__ . PHP_EOL;
     }
 }
 
 DI::set('demo1', function () {
     return new demo1(3);
 });
+
+DI::set('demo1', function () {
+    return new demo1(20);
+});
 DI::set('demo', function () {
     return new Demo(DI::get('demo1'), 2);
 });
 
-var_dump(DI::get('demo'));
+DI::set('demo2', demo2::class);
+
 var_dump(DI::get('demo'));
 
-//var_dump(DI::getAll());
+var_dump(DI::get('demo') === DI::get('demo'));
+
+DI::get('demo2')->test1();
+var_dump(DI::get('demo2') === DI::get('demo2'));
