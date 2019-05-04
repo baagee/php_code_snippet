@@ -124,71 +124,36 @@ class DI
     }
 }
 
-/**
- * Class demo1
- */
-class demo1
+class Phone
 {
-    protected $a = '';
-
-    /**
-     * demo1 constructor.
-     * @param $a
-     */
-    public function __construct($a)
+    public function call(User $user)
     {
-        $this->a = $a;
-        echo __METHOD__ . PHP_EOL;
+        echo __METHOD__ . ' ' . $user->name;
     }
 }
 
-/**
- * Class Demo
- */
-class Demo
+class User
 {
-    public    $a     = '';
-    protected $demo1 = null;
+    public    $name  = '';
+    protected $phone = null;
 
-    /**
-     * Demo constructor.
-     * @param demo1 $b
-     * @param int   $a
-     */
-    public function __construct(demo1 $b, $a = 1)
+    public function __construct(Phone $phone, $name)
     {
-        $this->demo1 = $b;
-        $this->a     = $a;
-        echo __METHOD__ . PHP_EOL;
+        $this->phone = $phone;
+        $this->name  = $name;
+    }
+
+    public function call(User $user)
+    {
+        $this->phone->call($user);
     }
 }
 
-class demo2
-{
-    protected $a = 'sdfs';
+DI::set('phone', Phone::class);
 
-    public function test1()
-    {
-        echo __METHOD__ . PHP_EOL;
-    }
-}
-
-DI::set('demo1', function () {
-    return new demo1(3);
+DI::set('user', function () {
+    return new User(DI::get('phone'), '小明');
 });
 
-DI::set('demo1', function () {
-    return new demo1(20);
-});
-DI::set('demo', function () {
-    return new Demo(DI::get('demo1'), 2);
-});
-
-DI::set('demo2', demo2::class);
-
-var_dump(DI::get('demo'));
-
-var_dump(DI::get('demo') === DI::get('demo'));
-
-DI::get('demo2')->test1();
-var_dump(DI::get('demo2') === DI::get('demo2'));
+$xiaoming=DI::get('user');
+var_dump($xiaoming);
