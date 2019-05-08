@@ -121,6 +121,19 @@ EOF;
         return $this->_redis->evalSha($hash, $params, $keyNum);
     }
 
+    public function alone(callable $func, $key)
+    {
+        if ($this->lockByLua($key)) {
+            try {
+                call_user_func($func);
+            } catch (Exception $e) {
+                // TODO 记录log
+            }
+            $this->unlock($key);
+        } else {
+            throw new Exception('上锁失败');
+        }
+    }
 }
 
 try {
@@ -137,6 +150,8 @@ try {
     } else {
         echo 'lock error' . PHP_EOL;
     }
+
+    $redisLock->alone('reduce', $key);
 } catch (Throwable $e) {
     echo $e->getMessage() . PHP_EOL;
 }
