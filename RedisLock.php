@@ -185,26 +185,26 @@ LUA;
 
 /*
 $redisLock = \Schedule\RedisLock::getInstance(new Redis());
-// $oj8k      = $redisLock->lock('test', 2,10);
-// if ($oj8k) {
-//     \Sftcwl\Log\Log::debug('get_lock_success');
-//     $this->reduce();
-//     $redisLock->unlock('test');
-//     return true;
-// } else {
-//     \Sftcwl\Log\Log::debug('get_lock_failed');
-//     return false;
-// }
-
+$oj8k      = $redisLock->lock('test', 2,10);
+if ($oj8k) {
+    \Log::debug('get_lock_success');
+    $this->reduce();
+    $redisLock->unlock('test');
+    return true;
+} else {
+    \Log::debug('get_lock_failed');
+    return false;
+}
+// 或者
 $oj8k = $redisLock->run(function () {
     $this->reduce();
     // throw new Exception('s');
 }, 'test', 2, 20);
 if ($oj8k) {
-    \Sftcwl\Log\Log::debug('get_lock_success');
+    \Log::debug('get_lock_success');
     return true;
 } else {
-    \Sftcwl\Log\Log::debug('get_lock_failed');
+    \Log::debug('get_lock_failed');
     return false;
 }
 */
