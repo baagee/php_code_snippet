@@ -32,6 +32,34 @@ function testSingle()
     var_dump($res);
 }
 
+if (!function_exists('\curl_file_create')) {
+    function curl_file_create($filename, $mimetype = '', $postname = '')
+    {
+        return "@$filename;filename="
+            . ($postname ?: basename($filename))
+            . ($mimetype ? ";type=$mimetype" : '');
+    }
+}
+
+function testUpload()
+{
+    $re      = new SingleRequest([
+        'host'               => 'http://10.188.60.200:8550',
+        'timeout_ms'         => 1000,//读取超时 毫秒
+        'connect_timeout_ms' => 1000, // 连接超时 毫秒
+    ]);
+    $path    = '/api/upload/images';
+    $params  = [
+        'image-file' => curl_file_create(realpath('./111.png'), 'image/jpeg'),
+    ];
+    $method  = 'POST';
+    $cookies = 'PHPSESSID=147f6c0f7e8b93879183a93e00843ecf';
+    $headers = [];
+    $res     = $re->request($path, $params, $method, $headers, $cookies);
+
+    var_dump(json_decode($res['result'], true));
+}
+
 
 function testMulti()
 {
@@ -94,6 +122,8 @@ function testMulti()
 
 testMulti();
 testSingle();
+
+testUpload();
 
 
 

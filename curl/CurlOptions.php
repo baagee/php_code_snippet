@@ -105,9 +105,27 @@ class CurlOptions
                 }
             } else {
                 // POST传输数据
-                $params    = http_build_query($params);
-                $headers[] = "Content-Type: application/x-www-form-urlencoded";
-                $headers[] = "Content-Length:" . strlen($params);
+                if (is_array($params)) {
+                    $hasFile = false;
+                    foreach ($params as $field => $val) {
+                        if ($val instanceof \CURLFile) {
+                            $hasFile = true;
+                            break;
+                        }
+                    }
+                    if ($hasFile) {
+                        //有文件上传 不做处理
+                        $headers[] = 'Content-Type: multipart/form-data';
+                    } else {
+                        // 没有文件 使用urlencoded
+                        $params    = http_build_query($params);
+                        $headers[] = "Content-Type: application/x-www-form-urlencoded";
+                        $headers[] = "Content-Length:" . strlen($params);
+                    }
+                } elseif (is_string($params)) {
+                    $headers[] = "Content-Type: application/x-www-form-urlencoded";
+                    $headers[] = "Content-Length:" . strlen($params);
+                }
             }
             $options[CURLOPT_CUSTOMREQUEST] = $method;
             $options[CURLOPT_POSTFIELDS]    = $params;
