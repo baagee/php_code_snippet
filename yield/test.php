@@ -8,19 +8,19 @@
  */
 class Task
 {
-    protected $_taskId = null;
+    protected $_taskId    = null;
     protected $_coroutine = null;
     protected $_sendValue = null;
     protected $_fistYield = true;
 
     /**
      * Task constructor.
-     * @param int $task_id 任务ID
+     * @param int       $task_id 任务ID
      * @param Generator $coroutine
      */
     public function __construct($task_id, Generator $coroutine)
     {
-        $this->_taskId = $task_id;
+        $this->_taskId    = $task_id;
         $this->_coroutine = $coroutine;
     }
 
@@ -45,7 +45,7 @@ class Task
             return $this->_coroutine->current();
         } else {
             // 中断后接着执行 value 赋值给上次yield的地方然后，自动指针后移，调用current
-            $return = $this->_coroutine->send($this->_sendValue);
+            $return           = $this->_coroutine->send($this->_sendValue);
             $this->_sendValue = null;
             return $return;
         }
@@ -73,7 +73,7 @@ class Task
 class Schedule
 {
     protected $_maxTaskId = 0;
-    protected $_taskMap = [];// taskId=>Task
+    protected $_taskMap   = [];// taskId=>Task
     // 任务队列
     protected $_taskQueue = null;
 
@@ -89,8 +89,8 @@ class Schedule
      */
     public function addNewTask(Generator $coroutine)
     {
-        $taskId = ++$this->_maxTaskId;
-        $task = new Task($taskId, $coroutine);
+        $taskId                  = ++$this->_maxTaskId;
+        $task                    = new Task($taskId, $coroutine);
         $this->_taskMap[$taskId] = $task;
         $this->schedule($task);
         return $taskId;
@@ -110,7 +110,7 @@ class Schedule
         // 当队列中有任务时
         while (!$this->_taskQueue->isEmpty()) {
             $task = $this->_taskQueue->dequeue();// 取出一个队列
-            $res = $task->run();
+            $res  = $task->run();
             if ($res instanceof SystemCall) {
                 // 如果task返回值属于系统调用类型的
                 $res($task, $this);
@@ -129,20 +129,20 @@ class Schedule
     /*
      * 杀死一个任务进程
      */
-//    public function killTask($taskId)
-//    {
-//        if (!isset($this->_taskMap[$taskId])) {
-//            return false;
-//        }
-//        unset($this->_taskMap[$taskId]);
-//        foreach ($this->_taskQueue as $i => $task) {
-//            if ($task->getTaskId() == $taskId) {
-//                unset($this->_taskQueue[$i]);
-//                break;
-//            }
-//        }
-//        return true;
-//    }
+    //    public function killTask($taskId)
+    //    {
+    //        if (!isset($this->_taskMap[$taskId])) {
+    //            return false;
+    //        }
+    //        unset($this->_taskMap[$taskId]);
+    //        foreach ($this->_taskQueue as $i => $task) {
+    //            if ($task->getTaskId() == $taskId) {
+    //                unset($this->_taskQueue[$i]);
+    //                break;
+    //            }
+    //        }
+    //        return true;
+    //    }
 }
 
 
@@ -167,6 +167,7 @@ function task_1()
 {
     for ($i = 1; $i <= 9; $i++) {
         echo 'task_1    $i=' . $i . PHP_EOL;
+        sleep(1);
         yield;
     }
 }
@@ -176,6 +177,7 @@ function task_2()
 {
     for ($j = 1; $j < 5; $j++) {
         echo 'task_2    $j=' . $j . PHP_EOL;
+        sleep(1);
         yield;
     }
 }
@@ -193,9 +195,11 @@ function task($max)
     $taskId = yield getTaskId();
     for ($i = 1; $i <= $max; ++$i) {
         echo "This is task $taskId iteration $i" . PHP_EOL;
+        sleep(1);
         yield;
     }
 }
+
 //
 //$schedule = new Schedule();
 //$schedule->addNewTask(task(5));
@@ -203,6 +207,25 @@ function task($max)
 //$schedule->run();
 
 $schedule = new Schedule();
-$schedule->addNewTask(task_1());
-$schedule->addNewTask(task_2());
+// $schedule->addNewTask(task_1());
+// $schedule->addNewTask(task_2());
+
+$schedule->addNewTask(task(5));
+$schedule->addNewTask(task(9));
+
+$t1 = microtime(true);
 $schedule->run();
+$t2 = microtime(true);
+
+echo 'yield:time:' . (($t2 - $t1) * 1000) . PHP_EOL;
+for ($i = 1; $i <= 9; $i++) {
+    echo 'task_1    $i=' . $i . PHP_EOL;
+    sleep(1);
+}
+
+for ($j = 1; $j < 5; $j++) {
+    echo 'task_2    $j=' . $j . PHP_EOL;
+    sleep(1);
+}
+$t3 = microtime(true);
+echo 'yield:time:' . (($t3 - $t2) * 1000) . PHP_EOL;
