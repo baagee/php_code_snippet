@@ -177,6 +177,7 @@ function task_2()
 {
     for ($j = 1; $j < 5; $j++) {
         echo 'task_2    $j=' . $j . PHP_EOL;
+        // yield;
         sleep(1);
         yield;
     }
@@ -195,8 +196,9 @@ function task($max)
     $taskId = yield getTaskId();
     for ($i = 1; $i <= $max; ++$i) {
         echo "This is task $taskId iteration $i" . PHP_EOL;
-        sleep(1);
         yield;
+        sleep(1);
+        // yield;
     }
 }
 
@@ -211,13 +213,14 @@ $schedule = new Schedule();
 // $schedule->addNewTask(task_2());
 
 $schedule->addNewTask(task(5));
-$schedule->addNewTask(task(9));
+$schedule->addNewTask(task(3));
 
 $t1 = microtime(true);
 $schedule->run();
 $t2 = microtime(true);
 
 echo 'yield:time:' . (($t2 - $t1) * 1000) . PHP_EOL;
+die;
 for ($i = 1; $i <= 9; $i++) {
     echo 'task_1    $i=' . $i . PHP_EOL;
     sleep(1);

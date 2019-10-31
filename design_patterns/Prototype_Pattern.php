@@ -45,3 +45,6 @@ $c2 = $c1->getClone();
 $c2->getId();
 $c3=$c2->getClone();
 $c3->getId();
+
+$c4=clone $c3;
+$c4->getId();
