@@ -1,0 +1,10 @@
+{
+  "autoload": {
+    "psr-4": {
+    }
+  },
+  "require": {
+    "elasticsearch/elasticsearch": "6.*",
+    "baagee/php-mysql": "0.1.*"
+  }
+}
