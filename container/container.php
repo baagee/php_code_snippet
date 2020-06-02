@@ -3,12 +3,10 @@
 namespace container;
 
 use ArrayAccess;
-use ArrayIterator;
 use Closure;
 use Countable;
 use Exception;
 use InvalidArgumentException;
-use IteratorAggregate;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -18,7 +16,7 @@ use ReflectionMethod;
 /**
  * 容器管理类
  */
-class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, Countable
+class Container implements ContainerInterface, ArrayAccess, Countable
 {
     /**
      * 容器对象实例
@@ -42,7 +40,6 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
      * 容器回调
      * @var array
      */
-    protected $invokeCallback = [];
 
     /**
      * 获取当前容器的实例（单例）
@@ -60,34 +57,6 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
         }
 
         return static::$instance;
-    }
-
-    /**
-     * 设置当前容器的实例
-     * @param Container $instance
-     */
-    public static function setInstance(self $instance): void
-    {
-        static::$instance = $instance;
-    }
-
-    /**
-     * 注册一个容器对象回调
-     *
-     * @param string|Closure $abstract
-     * @param Closure|null   $callback
-     * @return void
-     */
-    public function resolving($abstract, Closure $callback = null): void
-    {
-        if ($abstract instanceof Closure) {
-            $this->invokeCallback['*'][] = $abstract;
-            return;
-        }
-
-        $abstract = $this->getAlias($abstract);
-
-        $this->invokeCallback[$abstract][] = $callback;
     }
 
     /**
@@ -136,7 +105,7 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
         } elseif (is_object($concrete)) {
             $this->instance($abstract, $concrete);
         } else {
-            $abstract              = $this->getAlias($abstract);
+            $abstract = $this->getAlias($abstract);
             $this->bind[$abstract] = $concrete;
         }
 
@@ -288,76 +257,6 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
     }
 
     /**
-     * 调用反射执行类的方法 支持参数绑定
-     * @param mixed $method     方法
-     * @param array $vars       参数
-     * @param bool  $accessible 设置是否可访问
-     * @return mixed
-     * @throws Exception
-     */
-    public function invokeMethod($method, array $vars = [], bool $accessible = false)
-    {
-        try {
-            if (is_array($method)) {
-                $class   = is_object($method[0]) ? $method[0] : $this->invokeClass($method[0]);
-                $reflect = new ReflectionMethod($class, $method[1]);
-            } else {
-                // 静态方法
-                $reflect = new ReflectionMethod($method);
-            }
-
-            $args = $this->bindParams($reflect, $vars);
-
-            if ($accessible) {
-                $reflect->setAccessible($accessible);
-            }
-
-            return $reflect->invokeArgs($class ?? null, $args);
-        } catch (ReflectionException $e) {
-            if (is_array($method)) {
-                $class    = is_object($method[0]) ? get_class($method[0]) : $method[0];
-                $callback = $class . '::' . $method[1];
-            } else {
-                $callback = $method;
-            }
-
-            throw new Exception('method not exists: ' . $callback . '()', 0, $e);
-        }
-    }
-
-    /**
-     * 调用反射执行类的方法 支持参数绑定
-     * @param object $instance 对象实例
-     * @param mixed  $reflect  反射类
-     * @param array  $vars     参数
-     * @return mixed
-     * @throws Exception
-     */
-    public function invokeReflectMethod($instance, $reflect, array $vars = [])
-    {
-        $args = $this->bindParams($reflect, $vars);
-
-        return $reflect->invokeArgs($instance, $args);
-    }
-
-    /**
-     * 调用反射执行callable 支持参数绑定
-     * @param mixed $callable
-     * @param array $vars       参数
-     * @param bool  $accessible 设置是否可访问
-     * @return mixed
-     * @throws Exception
-     */
-    public function invoke($callable, array $vars = [], bool $accessible = false)
-    {
-        if ($callable instanceof Closure) {
-            return $this->invokeFunction($callable, $vars);
-        }
-
-        return $this->invokeMethod($callable, $vars, $accessible);
-    }
-
-    /**
      * 调用反射执行类的实例化 支持依赖注入
      * @param string $class 类名
      * @param array  $vars  参数
@@ -382,35 +281,9 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
 
             $args = $constructor ? $this->bindParams($constructor, $vars) : [];
 
-            $object = $reflect->newInstanceArgs($args);
-
-            $this->invokeAfter($class, $object);
-
-            return $object;
+            return $reflect->newInstanceArgs($args);
         } catch (ReflectionException $e) {
             throw new Exception('class not exists: ' . $class);
-        }
-    }
-
-    /**
-     * 执行invokeClass回调
-     * @access protected
-     * @param string $class  对象类名
-     * @param object $object 容器对象实例
-     * @return void
-     */
-    protected function invokeAfter(string $class, $object): void
-    {
-        if (isset($this->invokeCallback['*'])) {
-            foreach ($this->invokeCallback['*'] as $callback) {
-                $callback($object, $this);
-            }
-        }
-
-        if (isset($this->invokeCallback[$class])) {
-            foreach ($this->invokeCallback[$class] as $callback) {
-                $callback($object, $this);
-            }
         }
     }
 
@@ -429,14 +302,14 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
 
         // 判断数组类型 数字数组时按顺序绑定参数
         reset($vars);
-        $type   = key($vars) === 0 ? 1 : 0;
+        $type = key($vars) === 0 ? 1 : 0;
         $params = $reflect->getParameters();
-        $args   = [];
+        $args = [];
 
         foreach ($params as $param) {
-            $name      = $param->getName();
+            $name = $param->getName();
             $lowerName = strtolower($name);
-            $class     = $param->getClass();
+            $class = $param->getClass();
 
             if ($class) {
                 $args[] = $this->getObjectParam($class->getName(), $vars);
@@ -458,21 +331,18 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
 
     /**
      * 创建工厂对象实例
-     * @param string $name      工厂类名
-     * @param string $namespace 默认命名空间
+     * @param string $className 工厂类名
      * @param array  ...$args
      * @return mixed|object
      * @throws Exception
      */
-    public static function factory(string $name, string $namespace = '', ...$args)
+    public static function factory(string $className, ...$args)
     {
-        $class = false !== strpos($name, '\\') ? $name : $namespace . ucwords($name);
-
-        if (class_exists($class)) {
-            return Container::getInstance()->invokeClass($class, $args);
+        if (class_exists($className)) {
+            return Container::getInstance()->invokeClass($className, $args);
         }
 
-        throw new Exception('class not exists:' . $class);
+        throw new Exception('class not exists:' . $className);
     }
 
     /**
@@ -541,11 +411,5 @@ class Container implements ContainerInterface, ArrayAccess, IteratorAggregate, C
     public function count()
     {
         return count($this->instances);
-    }
-
-    //IteratorAggregate
-    public function getIterator()
-    {
-        return new ArrayIterator($this->instances);
     }
 }

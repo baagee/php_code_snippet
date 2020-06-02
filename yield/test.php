@@ -177,7 +177,7 @@ function task_2()
 {
     for ($j = 1; $j < 5; $j++) {
         echo 'task_2    $j=' . $j . PHP_EOL;
-        // yield;
+        yield;
         sleep(1);
         yield;
     }
@@ -196,8 +196,8 @@ function task($max)
     $taskId = yield getTaskId();
     for ($i = 1; $i <= $max; ++$i) {
         echo "This is task $taskId iteration $i" . PHP_EOL;
-        yield;
         sleep(1);
+        yield;
         // yield;
     }
 }
