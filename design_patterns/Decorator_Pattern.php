@@ -8,10 +8,6 @@
  */
 abstract class MessageBoardHandle
 {
-    public function __construct()
-    {
-    }
-
     abstract public function filter($msg);
 }
 
@@ -23,17 +19,12 @@ class MessageBoard extends MessageBoardHandle
     }
 }
 
-$m = new MessageBoard();
-
-$m->filter('hello 666');
-
-class MessageBoardDecorator extends MessageBoardHandle
+abstract class MessageBoardDecorator extends MessageBoardHandle
 {
     protected $_handle = null;
 
     public function __construct(MessageBoardHandle $handle)
     {
-        parent::__construct();
         $this->_handle = $handle;
     }
 
@@ -46,16 +37,19 @@ class MessageBoardDecorator extends MessageBoardHandle
 // 数字过滤器
 class NumberFilterDecorator extends MessageBoardDecorator
 {
-    public function __construct($handle)
-    {
-        parent::__construct($handle);
-    }
-
     public function filter($msg)
     {
         parent::filter(str_replace('6', '', $msg));
     }
 }
 
-$nn = new NumberFilterDecorator(new MessageBoard());
+class ToUpper extends MessageBoardDecorator
+{
+    public function filter($msg)
+    {
+        parent::filter(strtoupper($msg));
+    }
+}
+
+$nn = new ToUpper(new NumberFilterDecorator(new MessageBoard()));
 $nn->filter('hello 666');
