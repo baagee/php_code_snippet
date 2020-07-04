@@ -20,7 +20,7 @@ class Container implements ContainerInterface, ArrayAccess, Countable
 {
     /**
      * 容器对象实例
-     * @var Container|Closure
+     * @var Container
      */
     protected static $instance;
 
@@ -52,10 +52,23 @@ class Container implements ContainerInterface, ArrayAccess, Countable
             static::$instance = new static;
         }
 
-        if (static::$instance instanceof Closure) {
-            return (static::$instance)();
-        }
+        return static::$instance;
+    }
 
+    /**
+     * 禁止创建新容器
+     * Container constructor.
+     */
+    private function __construct()
+    {
+    }
+
+    /**
+     * 克隆也是返回他自己
+     * @return Container
+     */
+    public function __clone()
+    {
         return static::$instance;
     }
 
