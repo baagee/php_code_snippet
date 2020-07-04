@@ -1,0 +1,369 @@
+### ES接口简单实用示例
+
+#### 添加索引
+PUT http://127.0.0.1:9200/computer
+Content-Type: application/json
+
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 2,
+            "number_of_replicas": 0
+        }
+    }
+}
+
+### 删除索引
+DELETE http://127.0.0.1:9200/goods
+
+### 插入数据 非结构化数据不需要提前创建 插入数据自动创建
+POST http://127.0.0.1:9200/computer/account/1
+Content-Type: application/json
+
+{
+    "user_id": 342352345,
+    "user_name": "你美",
+    "age": 19,
+    "sex": 0,
+    "sex_desc": "女"
+}
+
+### 不指定ID插入
+POST http://127.0.0.1:9200/computer/account
+Content-Type: application/json
+
+{
+    "user_id": 236534634,
+    "user_name": "妈妈的朋友",
+    "age": 35,
+    "sex": 0,
+    "sex_desc": "女"
+}
+
+### 更新数据 全量覆盖 修改年龄 如果提交时少字段 就真的没了。。
+PUT http://127.0.0.1:9200/computer/account/1
+Content-Type: application/json
+
+{
+    "user_id": 342352345,
+    "user_name": "你美",
+    "age": 20,
+    "sex": 0,
+    "sex_desc": "女"
+}
+
+### 局部更新数据
+POST http://127.0.0.1:9200/computer/account/NteAGXMBMoVi4SYyEL1H/_update
+Content-Type: application/json
+
+{
+    "doc": {
+        "age": 21
+    }
+}
+
+### 删除数据
+DELETE http://127.0.0.1:9200/computer/account/1
+
+### 搜索数据
+GET http://127.0.0.1:9200/computer/account/NteAGXMBMoVi4SYyEL1H
+
+### 搜索数据 多条件用 空格
+GET http://127.0.0.1:9200/computer/account/_search?q=age:19
+
+### DSL搜索查询
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "age": 21
+        }
+    }
+}
+
+### DSL搜索查询 18岁以下的女孩子
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "range": {
+                    "age": {
+                        "lt": 18
+                    }
+                }
+            },
+            "must": {
+                "match": {
+                    "sex": 0
+                }
+            }
+        }
+    }
+}
+
+
+### DSL搜索查询 全文搜索 并且针对关键字高亮展示
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "user_name": "爸 姐"
+        }
+    },
+    "highlight": {
+        "fields": {
+            "user_name": {}
+        }
+    }
+}
+
+
+### 聚合 类似group by查询
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "aggs": {
+        "all_interests": {
+            "terms": {
+                "field": "age"
+            }
+        }
+    }
+}
+
+
+### DSL搜索查询 只查询部分字段
+POST http://127.0.0.1:9200/computer/account/_search?_source=user_name,age,sex
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "age": 21
+        }
+    }
+}
+
+### 搜索查询 只查询返回_source里面的部分字段 不返回元数据
+GET http://127.0.0.1:9200/computer/account/NteAGXMBMoVi4SYyEL1H/_source?_source=user_name,age,sex
+
+### 判断文档是否存在 通过查看HTTP状态码404就可以
+HEAD http://127.0.0.1:9200/computer/account/abc
+
+### 批量查询 _mget
+POST http://127.0.0.1:9200/computer/account/_mget
+Content-Type: application/json
+
+{
+    "ids": [
+        "N9eIGXMBMoVi4SYyu707",
+        "O9eZGXMBMoVi4SYyFr3L",
+        "sdgs"
+    ]
+}
+
+### 批量操作 _bulk
+# {action:{metadata}}\n
+# {reqyest body}\n
+# {action:{metadata}}\n
+# {reqyest body}\n
+# {action:{metadata}}\n
+# {reqyest body}\n
+### 批量插入
+POST http://127.0.0.1:9200/computer/account/_bulk
+Content-Type: application/json
+
+{"create": {"_index": "computer","_type": "account","_id":"4673463"}}
+{"user_id": 4673463, "user_name": "收到", "age": 19, "sex": 0, "sex_desc": "女"}
+{"create": {"_index": "computer","_type": "account","_id":"4575685"}}
+{"user_id": 4575685, "user_name": "买菜阿姨", "age": 29, "sex": 0, "sex_desc": "女"}
+
+
+
+### 批量删除
+POST http://127.0.0.1:9200/computer/account/_bulk
+Content-Type: application/json
+
+{"delete": {"_index": "computer","_type": "account","_id":"4673463"}}
+{"delete": {"_index": "computer","_type": "account","_id":"4575685"}}
+
+
+### 分页查询
+GET http://127.0.0.1:9200/computer/account/_search?size=4&from=2
+
+### 创建索引mapping 类似mysql的数据库和表结构
+PUT http://127.0.0.1:9200/goods
+Content-Type: application/json
+
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 2,
+            "number_of_replicas": 0
+        }
+    },
+    "mappings": {
+        "sku": {
+            "properties":{
+                "id": {
+                    "type": "integer"
+                },
+                "attr": {
+                    "type": "keyword"
+                },
+                "value": {
+                    "type": "keyword"
+                },
+                "name": {
+                    "type": "text"
+                }
+            }
+        }
+    }
+}
+
+
+### 批量插入
+POST http://127.0.0.1:9200/goods/sku/_bulk
+Content-Type: application/json
+
+{"create": {"_index": "goods","_type": "sku","_id":"4673463"}}
+{"id": 4673463, "attr": "颜色", "value": "灰色","name": "手机"}
+{"create": {"_index": "goods","_type": "sku","_id":"34576856435"}}
+{"id": 34576856435, "attr": "颜色", "value": "黑色","name": "手机"}
+
+
+### 搜索
+POST http://127.0.0.1:9200/goods/sku/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "value": "黑色"
+        }
+    }
+}
+
+### 搜索 term精确查找 不能被全文索引的类型 单个值
+POST http://127.0.0.1:9200/goods/sku/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "term": {
+            "value": "黑色"
+        }
+    }
+}
+
+### 搜索 terms 精确查找 不能被全文索引的类型 单个值 类似于in
+POST http://127.0.0.1:9200/goods/sku/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "terms": {
+            "value": ["黑色","灰色"]
+        }
+    }
+}
+
+### range范围查找 17 < age <= 19
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "range": {
+            "age": {
+                "gt": 17,
+                "lte": 19
+            }
+        }
+    }
+}
+
+### exists 查找文档中是否包含指定字段或者没有某个字段 包含age
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "exists": {
+            "field": "age"
+        }
+    }
+}
+
+
+### match 标准查询  如果是文本搜索 会进行分词
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "age": 17
+        }
+    }
+}
+
+
+### bool 多条件查询
+# must类似于and
+# must_not 类似于not
+# should 类似于or
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "must": {
+                "term": {
+                    "age": 18
+                }
+            },
+            "must_not": {
+                "term": {
+                    "sex": 1
+                }
+            },
+            "should": [
+                {"term": {"sex": 0}},
+                {"term": {"sex_desc": "女"}},
+                {
+                    "match": {
+                        "user_name": "妹妹"
+                    }
+                }
+            ]
+        }
+    }
+}
+
+### 过滤查找 查询比过滤更耗时 精确匹配最好使用过滤 可以使用缓存
+POST http://127.0.0.1:9200/computer/account/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "term": {
+                    "age": 19
+                }
+            }
+        }
+    }
+}
+
