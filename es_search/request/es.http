@@ -367,3 +367,225 @@ Content-Type: application/json
     }
 }
 
+### 分词 指定分词器
+POST http://127.0.0.1:9200/_analyze
+Content-Type: application/json
+
+{
+    "analyzer": "standard",
+    "text": "hello my name is hh, what is your name ?"
+}
+
+
+### 分词 指定分词器
+POST http://127.0.0.1:9200/computer/_analyze
+Content-Type: application/json
+
+{
+    "analyzer": "standard",
+    "field": "user_name",
+    "text": "进度条的宽度是100%适配于它的父级元素，如上面的进度条是在一个300px的父容器中"
+}
+
+
+### 分词 指定分词器 使用IK分词
+POST http://127.0.0.1:9200/_analyze
+Content-Type: application/json
+
+{
+    "analyzer": "ik_max_word",
+    "text": "进度条的宽度是100%适配于它的父级元素，如上面的进度条是在一个300px的父容器中"
+}
+
+
+### 全文搜索测试 创建索引mapping 类似mysql的数据库和表结构
+PUT http://127.0.0.1:9200/fulltext
+Content-Type: application/json
+
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0
+        }
+    },
+    "mappings": {
+        "people": {
+            "properties":{
+                "id_card": {
+                    "type": "keyword"
+                },
+                "name": {
+                    "type": "text"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "sex": {
+                    "type": "keyword"
+                },
+                "email": {
+                    "type": "keyword"
+                },
+                "hobby": {
+                    "type": "text",
+                    "analyzer": "ik_max_word"
+                },
+                "address": {
+                    "type": "text",
+                    "analyzer": "ik_max_word"
+                }
+            }
+        }
+    }
+}
+
+### 不指定ID插入
+POST http://127.0.0.1:9200/fulltext/people
+Content-Type: application/json
+
+{
+    "id_card": "9876543234567",
+    "name": "小泽玛利亚",
+    "age": 28,
+    "sex": "女",
+    "email": "234567564532@cc.com",
+    "hobby": "唱歌，游泳，看片，做爱",
+    "address": "日本北海道"
+}
+
+### 搜索有游泳，做爱 爱好的人并且高亮 可以多词搜索 默认是or的关系
+POST http://127.0.0.1:9200/fulltext/people/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "hobby": "游泳，做爱"
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hobby": {}
+        }
+    }
+}
+
+### 搜索有游泳和做爱 爱好的人并且高亮 可以多词搜索 and 的关系
+POST http://127.0.0.1:9200/fulltext/people/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "hobby": {
+                "operator": "and",
+                "query": "游泳，做爱"
+            }
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hobby": {}
+        }
+    }
+}
+
+### 搜索有游泳和做爱 爱好的人并且高亮 可以多词搜索 指定最小匹配度
+POST http://127.0.0.1:9200/fulltext/people/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "match": {
+            "hobby": {
+                "minimum_should_match": "90%",
+                "query": "游泳，做爱"
+            }
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hobby": {}
+        }
+    }
+}
+
+### 组合搜索 爱好有跳舞 不能有看片 可以有打篮球 有打篮球相似度更高
+POST http://127.0.0.1:9200/fulltext/people/_search
+Content-Type: application/json
+
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match": {
+                    "hobby": "跳舞"
+                }
+            },
+            "must_not": {
+                "match": {
+                    "hobby": "看片"
+                }
+            },
+            "should": [
+                {
+                    "match": {
+                        "hobby": "打篮球"
+                    }
+                }
+            ],
+            "minimum_should_match": "99%"
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hobby": {}
+        }
+    }
+}
+
+
+### 组合搜索 权重 包含唱歌 跳舞的 如果包含打篮球 权重就是10 如果包含游泳权重就是20
+POST http://127.0.0.1:9200/fulltext/people/_search
+Content-Type: application/json
+
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match": {
+                    "hobby": {
+                        "query": "唱歌 跳舞",
+                        "operator": "and"
+                    }
+                }
+            },
+            "should": [
+                {
+                    "match": {
+                        "hobby": {
+                            "query": "打篮球",
+                            "boost": 10
+                        }
+                    }
+                },
+                {
+                    "match": {
+                        "hobby": {
+                            "query": "RAP",
+                            "boost": 20
+                        }
+                    }
+                }
+            ],
+            "minimum_should_match": "90%"
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hobby": {}
+        }
+    }
+}
+
