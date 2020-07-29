@@ -28,7 +28,6 @@ $dsl->highlight(['hometown']);
 $dsl->sort(['student_id' => 'desc']);
 $dsl->offset(0);
 $dsl->limit(100);
-$dsl->setHighlightTag('<span>', '</span>');
 $dsl->sourceInclude([
     "student_id",
     "student_name",
@@ -65,12 +64,12 @@ echo $dsl->getDslJson(true);
 
 $query = new \BaAGee\SimpleDsl\BoolQuery();
 $query->mustMultiMatch(['hobby', 'work'], '医生，打篮球');
-$dsl = new \BaAGee\SimpleDsl\ConvertDSL($query);
+$dsl = new \BaAGee\SimpleDsl\ConvertDSL();
+$dsl->addQuery($query);
 $dsl->highlight(['hobby', 'work']);
 $dsl->sort(['student_id' => 'desc']);
 $dsl->offset(0);
 $dsl->limit(100);
-$dsl->setHighlightTag('<span>', '</span>');
 echo $dsl->getDslJson(true);
 
 

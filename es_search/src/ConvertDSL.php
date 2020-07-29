@@ -20,21 +20,14 @@ class ConvertDSL
     protected $query = [];
 
     /**
-     * @var array
-     */
-    protected $hlPreTags  = [];
-    /**
-     * @var array
-     */
-    protected $hlPostTags = [];
-
-    /**
      * ConvertDSL constructor.
      * @param BoolQuery $boolQuery
      */
-    public function __construct(BoolQuery $boolQuery)
+    public function __construct(BoolQuery $boolQuery = null)
     {
-        $this->addQuery($boolQuery);
+        if ($boolQuery instanceof BoolQuery) {
+            $this->addQuery($boolQuery);
+        }
     }
 
     /**
@@ -48,19 +41,8 @@ class ConvertDSL
     }
 
     /**
-     * @param $startTag
-     * @param $endTag
-     * @return $this
-     */
-    public function setHighlightTag($startTag, $endTag)
-    {
-        $this->hlPreTags[] = $startTag;
-        $this->hlPostTags[] = $endTag;
-        return $this;
-    }
-
-    /**
-     * @param bool $pretty
+     * 获取dsl json
+     * @param bool $pretty 是否格式化
      * @return string
      */
     public function getDslJson($pretty = false)
@@ -73,6 +55,7 @@ class ConvertDSL
     }
 
     /**
+     * 排序
      * @param $sortArr
      * @return $this
      */
@@ -85,6 +68,7 @@ class ConvertDSL
     }
 
     /**
+     * 查询某些字段
      * @param array $fieldsArr
      * @return $this
      */
@@ -95,6 +79,7 @@ class ConvertDSL
     }
 
     /**
+     * 排除某些字段
      * @param array $fieldsArr
      * @return $this
      */
@@ -105,10 +90,13 @@ class ConvertDSL
     }
 
     /**
-     * @param $fields
+     * 高亮
+     * @param          $fields
+     * @param string[] $hlPreTags
+     * @param string[] $hlPostTags
      * @return $this
      */
-    public function highlight($fields)
+    public function highlight($fields, $hlPreTags = ['<em>'], $hlPostTags = ['</em>'])
     {
         if (!is_array($fields)) {
             $fields = [$fields];
@@ -116,10 +104,8 @@ class ConvertDSL
         foreach ($fields as $field) {
             $this->query['highlight']['fields'][$field] = new \stdClass();
         }
-        if (!empty($this->hlPreTags) && !empty($this->hlPostTags)) {
-            $this->query['highlight']['pre_tags'] = $this->hlPreTags;
-            $this->query['highlight']['post_tags'] = $this->hlPostTags;
-        }
+        $this->query['highlight']['pre_tags'] = $hlPreTags;
+        $this->query['highlight']['post_tags'] = $hlPostTags;
         return $this;
     }
 
@@ -132,6 +118,7 @@ class ConvertDSL
     }
 
     /**
+     * 分页 offset
      * @param int $offset
      * @return $this
      */
@@ -142,6 +129,7 @@ class ConvertDSL
     }
 
     /**
+     * 分页 limit
      * @param int $limit
      * @return $this
      */
