@@ -73,3 +73,37 @@ $dsl->limit(100);
 echo $dsl->getDslJson(true);
 
 
+$query = new \BaAGee\SimpleDsl\BoolQuery();
+$query->shouldTerms('hobby', ['打篮球', '游戏']);
+$query->shouldRange('student_id', ['gt' => 1593022192650]);
+$query->shouldLike('student_name', '韧*');
+$query->mustMatch('hometown', '济南市历下区和平路');
+$query->mustMultiMatch(['hobby', 'work'], '售货员');
+$query->shouldMatch('hometown', '济南市历下区和平路');
+$query->shouldMultiMatch(['hobby', 'work'], '售货员');
+$dsl = new \BaAGee\SimpleDsl\ConvertDSL();
+$dsl->addQuery($query);
+$dsl->sort(['student_id' => 'asc']);
+$dsl->offset(0);
+$dsl->highlight(['hometown', 'hobby', 'work']);
+$dsl->limit(100);
+echo $dsl->getDslJson(true);
+
+
+$query = new \BaAGee\SimpleDsl\BoolQuery();
+$query->notTerms('hobby', ['打篮球', '游戏']);
+$query->notRange('student_id', ['gt' => 1593022192650]);
+$query->notLike('student_name', '韧*');
+$query->shouldMatch('hometown', '济南市历下区和平路');
+$query->notMultiMatch(['hobby', 'work'], '售货员');
+$query2 = new \BaAGee\SimpleDsl\BoolQuery();
+$query2->shouldMatch('hometown', '济南市历下区和平路');
+$query2->notMultiMatch(['hobby', 'work'], '售货员');
+$query->notBoolQuery($query2);
+$dsl = new \BaAGee\SimpleDsl\ConvertDSL();
+$dsl->addQuery($query);
+$dsl->sort(['student_id' => 'asc']);
+$dsl->offset(0);
+$dsl->highlight(['hometown', 'hobby', 'work']);
+$dsl->limit(100);
+echo $dsl->getDslJson(true);
