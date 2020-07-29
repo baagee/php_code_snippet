@@ -1,10 +1,11 @@
 {
-  "autoload": {
-    "psr-4": {
+    "autoload": {
+        "psr-4": {
+            "BaAGee\\SimpleDsl\\": "./src"
+        }
+    },
+    "require": {
+        "elasticsearch/elasticsearch": "6.*",
+        "baagee/php-mysql": "0.*.*"
     }
-  },
-  "require": {
-    "elasticsearch/elasticsearch": "6.*",
-    "baagee/php-mysql": "0.1.*"
-  }
 }

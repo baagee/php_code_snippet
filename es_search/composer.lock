@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97de80761ef333af11b3f948a646cae3",
+    "content-hash": "2cc78d8268795b2239eef7522e476e77",
     "packages": [
         {
             "name": "baagee/php-mysql",
-            "version": "v0.1.9",
+            "version": "v0.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/baagee/php-mysql.git",
-                "reference": "d0329f6540b3acf249c77a6ed3b27ad4ff759573"
+                "reference": "84087e58a1ecb2fa9292236b397d5966fbf4c1ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/baagee/php-mysql/zipball/d0329f6540b3acf249c77a6ed3b27ad4ff759573",
-                "reference": "d0329f6540b3acf249c77a6ed3b27ad4ff759573",
+                "url": "https://api.github.com/repos/baagee/php-mysql/zipball/84087e58a1ecb2fa9292236b397d5966fbf4c1ec",
+                "reference": "84087e58a1ecb2fa9292236b397d5966fbf4c1ec",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -51,7 +51,7 @@
                 "mysql",
                 "php"
             ],
-            "time": "2019-11-29T08:11:49+00:00"
+            "time": "2020-07-08T03:03:59+00:00"
         },
         {
             "name": "elasticsearch/elasticsearch",
@@ -289,16 +289,16 @@
         },
         {
             "name": "react/promise",
-            "version": "v2.7.1",
+            "version": "v2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d"
+                "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
-                "reference": "31ffa96f8d2ed0341a57848cbb84d88b89dd664d",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/f3cff96a19736714524ca0dd1d4130de73dbbbc4",
+                "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -311,7 +311,7 @@
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.8"
+                "phpunit/phpunit": "^7.0 || ^6.5 || ^5.7 || ^4.8.36"
             },
             "type": "library",
             "autoload": {
@@ -337,7 +337,7 @@
                 "promise",
                 "promises"
             ],
-            "time": "2019-01-07T21:25:54+00:00"
+            "time": "2020-05-12T15:16:56+00:00"
         }
     ],
     "packages-dev": [],

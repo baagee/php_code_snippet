@@ -1,0 +1,532 @@
+### ES接口简单实用示例
+
+
+### 创建索引mapping 类似mysql的数据库和表结构
+PUT http://127.0.0.1:9200/student_info
+Content-Type: application/json
+
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 1,
+            "number_of_replicas": 0
+        }
+    },
+    "mappings": {
+        "info": {
+            "properties": {
+                "id": {
+                    "type": "long"
+                },
+                "student_name": {
+                    "type": "keyword"
+                },
+                "student_id": {
+                    "type": "long"
+                },
+                "create_time": {
+                    "type": "integer"
+                },
+                "update_time": {
+                    "type": "integer"
+                },
+                "hobby": {
+                    "type": "text",
+                    "analyzer": "ik_max_word"
+                },
+                "hometown": {
+                    "type": "text",
+                    "analyzer": "ik_max_word"
+                },
+                "phone": {
+                    "type": "keyword"
+                },
+                "work": {
+                    "type": "keyword"
+                },
+                "email": {
+                    "type": "text",
+                    "analyzer": "ik_max_word"
+                }
+            }
+        }
+    }
+}
+
+
+###  (email like "15434%" or work =医生) and hobby in (打篮球)
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "hobby": {
+                                    "query": "打篮球"
+                                }
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "term": {
+                                            "work": "医生"
+                                        }
+                                    },
+                                    {
+                                        "wildcard": {
+                                            "email": "339*"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+
+
+###  (email like "15434%" or work =医生)
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "should": [
+                        {
+                            "term": {
+                                "work": "医生"
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "339*"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+
+
+###  (hobby = 打篮球 or hobby = 做美食) and (email like "15434%" or work =医生)
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "must": {
+                        "match": {
+                            "hobby": {
+                                "query": "打篮球 做美食",
+                                "operator": "or"
+                            }
+                        }
+                    },
+                    "should": [
+                        {
+                            "term": {
+                                "work": "医生"
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "339*"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+
+
+###  (hobby = 打篮球 and hobby = 做美食) and (email like "15434%" or work =医生)
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "filter": {
+                "bool": {
+                    "must": {
+                        "match": {
+                            "hobby": {
+                                "query": "打篮球 做美食",
+                                "operator": "and"
+                            }
+                        }
+                    },
+                    "should": [
+                        {
+                            "term": {
+                                "work": "医生"
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "339*"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+
+
+###  使用到全文索引的用must 其他过滤性的用filter
+###  hometown  like '%海南省%' and  work in (医生,老师) and hobby in (打篮球,做美食) and email like "633%"
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "hometown": {
+                            "query": "海南省",
+                            "operator": "or"
+                        }
+                    }
+                }
+            ],
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "terms": {
+                                "work": [
+                                    "医生",
+                                    "老师"
+                                ]
+                            }
+                        },
+                        {
+                            "match": {
+                                "hobby": {
+                                    "query": "打篮球,做美食",
+                                    "operator": "and"
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "633*"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "_source": {
+        "includes": [
+            "student_id",
+            "student_name",
+            "work",
+            "hobby",
+            "hometown"
+        ],
+        "excludes": []
+    },
+    "highlight": {
+        "fields": {
+            "hometown": {}
+        }
+    },
+    "from": 0,
+    "size": 10
+}
+
+
+
+###
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "hometown": {
+                            "query": "海南省",
+                            "operator": "or"
+                        }
+                    }
+                },
+                {
+                    "match": {
+                        "hobby": {
+                            "query": "打篮球，做美食",
+                            "operator": "and"
+                        }
+                    }
+                }
+            ],
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "terms": {
+                                "work": [
+                                    "医生",
+                                    "老师"
+                                ]
+                            }
+                        },
+                        {
+                            "range": {
+                                "student_id": {
+                                    "gt": 1565324861568
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "*@test.com"
+                            }
+                        },
+                        {
+                            "term": {
+                                "work": "医生"
+                            }
+                        }
+                    ],
+                    "must_not": [
+                        {
+                            "term": {
+                                "student_id": 1594182044065
+                            }
+                        },
+                        {
+                            "term": {
+                                "student_id": 1593457121399
+                            }
+                        },
+                        {
+                            "terms": {
+                                "student_id": [
+                                    1593016393864,
+                                    1593015907427
+                                ]
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "phone": "1505143*"
+                            }
+                        }
+                    ]
+                }
+            },
+            "must_not": [
+                {
+                    "match": {
+                        "hometown": {
+                            "query": "湖北省武汉市",
+                            "operator": "or"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hometown": {}
+        }
+    },
+    "sort": {
+        "student_id": {
+            "order": "desc"
+        }
+    },
+    "_source": {
+        "includes": [
+            "student_id",
+            "student_name",
+            "work",
+            "hobby",
+            "hometown",
+            "phone"
+        ],
+        "excludes": [
+            "update_time"
+        ]
+    },
+    "from": 0,
+    "size": 100
+}
+
+###
+###
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "hobby": {
+                            "query": "打篮球 做美食",
+                            "operator": "and"
+                        }
+                    }
+                },
+                {
+                    "bool": {
+                        "filter": {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "term": {
+                                            "phone": 15163402615
+                                        }
+                                    },    {
+                                        "range": {
+                                            "student_id": {
+                                                "gt": 1565245896038,
+                                                "lte": 1565364034570
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ],
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "terms": {
+                                "work": [
+                                    "医生",
+                                    "老师"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "sort": {
+        "student_id": {
+            "order": "asc"
+        }
+    }
+}
+
+
+
+
+###
+POST http://127.0.0.1:9200/student_info/info/_search
+Content-Type: application/json
+
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "multi_match": {
+                        "query": "打篮球",
+                        "fields": ["hometown","hobby"],
+                        "type": "most_fields",
+                        "operator": "and"
+                    }
+                }
+            ],
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "terms": {
+                                "work": [
+                                    "医生",
+                                    "老师"
+                                ]
+                            }
+                        },
+                        {
+                            "range": {
+                                "student_id": {
+                                    "gt": 1565324861568
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": "*@test.com"
+                            }
+                        },
+                        {
+                            "term": {
+                                "work": "医生"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "highlight": {
+        "fields": {
+            "hometown": {},
+            "hobby": {}
+        }
+    },
+    "sort": {
+        "student_id": {
+            "order": "desc"
+        }
+    },
+    "_source": {
+        "includes": [
+            "student_id",
+            "student_name",
+            "work",
+            "hobby",
+            "hometown",
+            "phone"
+        ],
+        "excludes": [
+            "update_time"
+        ]
+    },
+    "from": 0,
+    "size": 100
+}
