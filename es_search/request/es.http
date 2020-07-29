@@ -450,18 +450,18 @@ Content-Type: application/json
     "age": 28,
     "sex": "女",
     "email": "234567564532@cc.com",
-    "hobby": "唱歌，游泳，看片，做爱",
+    "hobby": "唱歌，游泳，看电影，打牌",
     "address": "日本北海道"
 }
 
-### 搜索有游泳，做爱 爱好的人并且高亮 可以多词搜索 默认是or的关系
+### 搜索有游泳，打牌 爱好的人并且高亮 可以多词搜索 默认是or的关系
 POST http://127.0.0.1:9200/fulltext/people/_search
 Content-Type: application/json
 
 {
     "query": {
         "match": {
-            "hobby": "游泳，做爱"
+            "hobby": "游泳，打牌"
         }
     },
     "highlight": {
@@ -471,7 +471,7 @@ Content-Type: application/json
     }
 }
 
-### 搜索有游泳和做爱 爱好的人并且高亮 可以多词搜索 and 的关系
+### 搜索有游泳和打牌 爱好的人并且高亮 可以多词搜索 and 的关系
 POST http://127.0.0.1:9200/fulltext/people/_search
 Content-Type: application/json
 
@@ -480,7 +480,7 @@ Content-Type: application/json
         "match": {
             "hobby": {
                 "operator": "and",
-                "query": "游泳，做爱"
+                "query": "游泳，打牌"
             }
         }
     },
@@ -491,7 +491,7 @@ Content-Type: application/json
     }
 }
 
-### 搜索有游泳和做爱 爱好的人并且高亮 可以多词搜索 指定最小匹配度
+### 搜索有游泳和打牌 爱好的人并且高亮 可以多词搜索 指定最小匹配度
 POST http://127.0.0.1:9200/fulltext/people/_search
 Content-Type: application/json
 
@@ -500,7 +500,7 @@ Content-Type: application/json
         "match": {
             "hobby": {
                 "minimum_should_match": "90%",
-                "query": "游泳，做爱"
+                "query": "游泳，打牌"
             }
         }
     },
@@ -511,7 +511,7 @@ Content-Type: application/json
     }
 }
 
-### 组合搜索 爱好有跳舞 不能有看片 可以有打篮球 有打篮球相似度更高
+### 组合搜索 爱好有跳舞 不能有看电影 可以有打篮球 有打篮球相似度更高
 POST http://127.0.0.1:9200/fulltext/people/_search
 Content-Type: application/json
 
@@ -525,7 +525,7 @@ Content-Type: application/json
             },
             "must_not": {
                 "match": {
-                    "hobby": "看片"
+                    "hobby": "看电影"
                 }
             },
             "should": [

@@ -21,6 +21,7 @@ class BoolQuery
     //===========================must==========================
 
     /**
+     * 等于 =
      * @param $key
      * @param $val
      * @return $this
@@ -32,6 +33,7 @@ class BoolQuery
     }
 
     /**
+     * in
      * @param       $key
      * @param array $valArr
      * @return $this
@@ -43,6 +45,7 @@ class BoolQuery
     }
 
     /**
+     * like
      * @param $key
      * @param $val
      * @return $this
@@ -54,6 +57,7 @@ class BoolQuery
     }
 
     /**
+     * 分词匹配
      * @param        $key
      * @param        $val
      * @param string $operator
@@ -66,6 +70,7 @@ class BoolQuery
     }
 
     /**
+     * 多个字段同时匹配
      * @param array  $fields
      * @param        $val
      * @param string $type
@@ -78,6 +83,7 @@ class BoolQuery
     }
 
     /**
+     * 范围查询
      * @param       $key
      * @param array $operatorToVal
      * @return $this
@@ -90,6 +96,7 @@ class BoolQuery
     }
 
     /**
+     * 嵌套一个bool查询
      * @param BoolQuery $boolQuery
      * @return $this
      */
