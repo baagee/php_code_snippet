@@ -277,7 +277,7 @@ class BoolQuery
      */
     public function getDslJson($pretty = false)
     {
-        $flag = JSON_UNESCAPED_UNICODE;
+        $flag = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
         if ($pretty) {
             $flag |= JSON_PRETTY_PRINT;
         }
