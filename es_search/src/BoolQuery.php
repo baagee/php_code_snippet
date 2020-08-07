@@ -26,7 +26,7 @@ class BoolQuery
      * @param $val
      * @return $this
      */
-    public function mustTerm($key, $val)
+    public function mustEqual($key, $val)
     {
         $this->query['bool']['filter']['bool']['must'][] = ['term' => [$key => $val]];
         return $this;
@@ -38,7 +38,7 @@ class BoolQuery
      * @param array $valArr
      * @return $this
      */
-    public function mustTerms($key, array $valArr)
+    public function mustIn($key, array $valArr)
     {
         $this->query['bool']['filter']['bool']['must'][] = ['terms' => [$key => $valArr]];
         return $this;
@@ -87,12 +87,37 @@ class BoolQuery
      * @param       $key
      * @param array $operatorToVal
      * @return $this
+     * @throws \Exception
      */
     public function mustRange($key, array $operatorToVal)
     {
         // $this->query['bool']['must'][] = ['range' => [$key => $operatorToVal]];
-        $this->query['bool']['filter']['bool']['must'][] = ['range' => [$key => $operatorToVal]];
+        $this->query['bool']['filter']['bool']['must'][] = ['range' => [$key => $this->transformRange($operatorToVal)]];
         return $this;
+    }
+
+    /**
+     * 转化范围查询
+     * @param $mapArr
+     * @return array
+     * @throws \Exception
+     */
+    protected function transformRange($mapArr)
+    {
+        $map = [
+            '>' => 'gt',
+            '>=' => 'gte',
+            '<' => 'lt',
+            '<=' => 'lte',
+        ];
+        $ret = [];
+        foreach ($mapArr as $opr => $value) {
+            if (!isset($map[$opr])) {
+                throw new \Exception('不支持的范围符号：' . $opr);
+            }
+            $ret[$map[$opr]] = $value;
+        }
+        return $ret;
     }
 
     /**
@@ -113,7 +138,7 @@ class BoolQuery
      * @param $val
      * @return $this
      */
-    public function shouldTerm($key, $val)
+    public function shouldEqual($key, $val)
     {
         $this->query['bool']['filter']['bool']['should'][] = ['term' => [$key => $val]];
         return $this;
@@ -124,7 +149,7 @@ class BoolQuery
      * @param array $valArr
      * @return $this
      */
-    public function shouldTerms($key, array $valArr)
+    public function shouldIn($key, array $valArr)
     {
         $this->query['bool']['filter']['bool']['should'][] = ['terms' => [$key => $valArr]];
         return $this;
@@ -170,11 +195,12 @@ class BoolQuery
      * @param       $key
      * @param array $operatorToVal
      * @return $this
+     * @throws \Exception
      */
     public function shouldRange($key, array $operatorToVal)
     {
         // $this->query['bool']['should'][] = ['range' => [$key => $operatorToVal]];
-        $this->query['bool']['filter']['bool']['should'][] = ['range' => [$key => $operatorToVal]];
+        $this->query['bool']['filter']['bool']['should'][] = ['range' => [$key => $this->transformRange($operatorToVal)]];
         return $this;
     }
 
@@ -195,7 +221,7 @@ class BoolQuery
      * @param $val
      * @return $this
      */
-    public function notTerm($key, $val)
+    public function notEqual($key, $val)
     {
         $this->query['bool']['filter']['bool']['must_not'][] = ['term' => [$key => $val]];
         return $this;
@@ -206,7 +232,7 @@ class BoolQuery
      * @param array $valArr
      * @return $this
      */
-    public function notTerms($key, array $valArr)
+    public function notIn($key, array $valArr)
     {
         $this->query['bool']['filter']['bool']['must_not'][] = ['terms' => [$key => $valArr]];
         return $this;
@@ -251,11 +277,12 @@ class BoolQuery
      * @param       $key
      * @param array $operatorToVal
      * @return $this
+     * @throws \Exception
      */
     public function notRange($key, array $operatorToVal)
     {
         // $this->query['bool']['must_not'][] = ['range' => [$key => $operatorToVal]];
-        $this->query['bool']['filter']['bool']['must_not'][] = ['range' => [$key => $operatorToVal]];
+        $this->query['bool']['filter']['bool']['must_not'][] = ['range' => [$key => $this->transformRange($operatorToVal)]];
         return $this;
     }
 
