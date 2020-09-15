@@ -124,7 +124,7 @@ class ConvertDSL
      */
     public function offset($offset = 0)
     {
-        $this->query['from'] = $offset;
+        $this->query['from'] = (int)$offset;
         return $this;
     }
 
@@ -135,7 +135,26 @@ class ConvertDSL
      */
     public function limit($limit = 100)
     {
-        $this->query['size'] = $limit;
+        $this->query['size'] = (int)$limit;
+        return $this;
+    }
+
+    /**
+     * @param array $searchAfter
+     * @return $this
+     * @throws \Exception
+     */
+    public function searchAfter(array $searchAfter)
+    {
+        if (empty($this->query['sort'])) {
+            throw new \Exception('请先设置好排序 orderBy');
+        }
+        $searchAfter = (array)$searchAfter;
+        if (!empty($searchAfter)) {
+            $this->query['search_after'] = $searchAfter;
+        } else {
+            unset($this->query['search_after']);
+        }
         return $this;
     }
 }

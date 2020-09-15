@@ -131,6 +131,21 @@ class BoolQuery
         return $this;
     }
 
+    /**
+     * 通过脚本自定义查询
+     * @param string $script
+     * @return $this
+     */
+    public function mustScript(string $script)
+    {
+        if (!empty($script)) {
+            $this->query['bool']['filter']['bool']['must'][] = [
+                'script' => ['script' => $script]
+            ];
+        }
+        return $this;
+    }
+
     //===========================should==========================
 
     /**
@@ -214,6 +229,21 @@ class BoolQuery
         return $this;
     }
 
+    /**
+     * 通过脚本自定义查询
+     * @param string $script
+     * @return $this
+     */
+    public function shouldScript(string $script)
+    {
+        if (!empty($script)) {
+            $this->query['bool']['filter']['bool']['should'][] = [
+                'script' => ['script' => $script]
+            ];
+        }
+        return $this;
+    }
+
     //===========================not==========================
 
     /**
@@ -293,6 +323,21 @@ class BoolQuery
     public function notBoolQuery(BoolQuery $boolQuery)
     {
         $this->query['bool']['filter']['bool']['must_not'][] = $boolQuery->getDslArray();
+        return $this;
+    }
+
+    /**
+     * 通过脚本自定义查询
+     * @param string $script
+     * @return $this
+     */
+    public function notScript(string $script)
+    {
+        if (!empty($script)) {
+            $this->query['bool']['filter']['bool']['must_not'][] = [
+                'script' => ['script' => $script]
+            ];
+        }
         return $this;
     }
 
